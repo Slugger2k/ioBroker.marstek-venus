@@ -1,0 +1,44 @@
+{
+  "name": "iobroker.marstek-venus",
+  "version": "0.1.0",
+  "description": "ioBroker adapter for Marstek Venus C/D/E energy storage devices",
+  "author": {
+    "name": "ioBroker Community"
+  },
+  "homepage": "https://github.com/ioBroker/ioBroker.marstek-venus",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "marstek",
+    "venus",
+    "battery",
+    "energy storage",
+    "solar",
+    "inverter"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ioBroker/ioBroker.marstek-venus.git"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.0.0"
+  },
+  "devDependencies": {
+    "@iobroker/testing": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "main": "main.js",
+  "files": [
+    "admin/",
+    "lib/",
+    "main.js",
+    "io-package.json"
+  ],
+  "scripts": {
+    "test": "npm run test:package && npm run test:unit",
+    "test:package": "mocha test/package --exit",
+    "test:unit": "mocha test/unit --exit",
+    "test:integration": "mocha test/integration --exit"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "common": {
+    "name": "marstek-venus",
+    "version": "0.1.0",
+    "title": "Marstek Venus",
+    "titleLang": {
+      "en": "Marstek Venus Energy Storage",
+      "de": "Marstek Venus Energiespeicher"
+    },
+    "desc": "Adapter for Marstek Venus C/D/E energy storage devices",
+    "descLang": {
+      "en": "Integrates Marstek Venus battery inverters with ioBroker using official local Open API",
+      "de": "Integriert Marstek Venus Batteriewechselrichter mit ioBroker über die offizielle lokale Open API"
+    },
+    "authors": [
+      "ioBroker Community"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "materialize": true,
+    "noConfig": false,
+    "noIntro": false,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "dependencies": [
+      {
+        "js-controller": ">=5.0.0"
+      }
+    ],
+    "keywords": [
+      "marstek",
+      "venus",
+      "battery",
+      "solar",
+      "energy storage",
+      "inverter",
+      "pv"
+    ],
+    "logLevel": "info",
+    "translated": false,
+    "supportedMessages": [
+      "sendTo"
+    ]
+  },
+  "native": {
+    "ipAddress": "",
+    "udpPort": 30000,
+    "pollInterval": 1000,
+    "autoDiscovery": true
+  },
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information",
+        "role": "info"
+      },
+      "native": {}
+    },
+    {
+      "_id": "battery",
+      "type": "channel",
+      "common": {
+        "name": "Battery",
+        "role": "battery"
+      },
+      "native": {}
+    },
+    {
+      "_id": "power",
+      "type": "channel",
+      "common": {
+        "name": "Power",
+        "role": "power"
+      },
+      "native": {}
+    },
+    {
+      "_id": "energy",
+      "type": "channel",
+      "common": {
+        "name": "Energy",
+        "role": "energy"
+      },
+      "native": {}
+    },
+    {
+      "_id": "control",
+      "type": "channel",
+      "common": {
+        "name": "Control",
+        "role": "control"
+      },
+      "native": {}
+    },
+    {
+      "_id": "network",
+      "type": "channel",
+      "common": {
+        "name": "Network",
+        "role": "info.network"
+      },
+      "native": {}
+    }
+  ]
+}
