@@ -239,6 +239,20 @@ class MarstekVenusAdapter extends utils.Adapter {
                 if (response.result && response.result.ip) {
                     if (!this.config.ipAddress) {
                         this.config.ipAddress = response.result.ip;
+                        this.getForeignObject("system.adapter." + this.namespace, (err, obj) => {
+                            if (err) {
+                                this.log.error(`Failed to get adapter object: ${err}`);
+                                return;
+                            }
+                            obj.native.ipAddress = this.config.ipAddress;
+                            this.setForeignObject("system.adapter." + this.namespace, obj, (err) => {
+                                if (err) {
+                                    this.log.error(`Failed to update adapter config: ${err}`);
+                                } else {
+                                    this.log.info(`Updated adapter config with IP: ${this.config.ipAddress}`);
+                                }
+                            });
+                        });
                         this.log.info(`Auto-selecting discovered device: ${this.config.ipAddress}`);
                         this.startPolling();
                     } else {
