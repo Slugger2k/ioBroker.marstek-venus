@@ -43,6 +43,8 @@
 
     <button onclick="discover()">🔍 Discover Devices</button>
 
+    <button onclick="window.parent.document.querySelector('.btn-save-close').click();">Save</button>
+
     <script>
         function load(settings) {
             document.getElementById('autoDiscovery').checked = settings.autoDiscovery ?? true;
