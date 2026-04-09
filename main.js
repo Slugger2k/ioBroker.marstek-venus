@@ -93,6 +93,12 @@ class MarstekVenusAdapter extends utils.Adapter {
         await this.setObjectNotExistsAsync('power.pv', {
             type: 'state', common: { name: 'PV power', type: 'number', unit: 'W', role: 'value.power', read: true, write: false }, native: {}
         });
+        await this.setObjectNotExistsAsync('power.pvVoltage', {
+            type: 'state', common: { name: 'PV voltage', type: 'number', unit: 'V', role: 'value.voltage', read: true, write: false }, native: {}
+        });
+        await this.setObjectNotExistsAsync('power.pvCurrent', {
+            type: 'state', common: { name: 'PV current', type: 'number', unit: 'A', role: 'value.current', read: true, write: false }, native: {}
+        });
         await this.setObjectNotExistsAsync('power.grid', {
             type: 'state', common: { name: 'Grid power', type: 'number', unit: 'W', role: 'value.power', read: true, write: false }, native: {}
         });
@@ -126,17 +132,23 @@ class MarstekVenusAdapter extends utils.Adapter {
             type: 'state', common: { name: 'Passive mode duration', type: 'number', unit: 's', role: 'level', min: 0, max: 86400, read: true, write: true }, native: {}
         });
 
-        await this.setObjectNotExistsAsync('network.ip', {
-            type: 'state', common: { name: 'IP Address', type: 'string', role: 'text', read: true, write: false }, native: {}
+        await this.setObjectNotExistsAsync('control.manualTimeNum', {
+            type: 'state', common: { name: 'Manual mode time slot (0-9)', type: 'number', role: 'level', min: 0, max: 9, read: true, write: true }, native: {}
         });
-        await this.setObjectNotExistsAsync('network.ssid', {
-            type: 'state', common: { name: 'WiFi SSID', type: 'string', role: 'text', read: true, write: false }, native: {}
+        await this.setObjectNotExistsAsync('control.manualStartTime', {
+            type: 'state', common: { name: 'Manual mode start time', type: 'string', role: 'text', read: true, write: true }, native: {}
         });
-        await this.setObjectNotExistsAsync('network.rssi', {
-            type: 'state', common: { name: 'WiFi signal', type: 'number', unit: 'dBm', role: 'value.rssi', read: true, write: false }, native: {}
+        await this.setObjectNotExistsAsync('control.manualEndTime', {
+            type: 'state', common: { name: 'Manual mode end time', type: 'string', role: 'text', read: true, write: true }, native: {}
         });
-        await this.setObjectNotExistsAsync('network.bleState', {
-            type: 'state', common: { name: 'Bluetooth state', type: 'string', role: 'text', read: true, write: false }, native: {}
+        await this.setObjectNotExistsAsync('control.manualWeekdays', {
+            type: 'state', common: { name: 'Manual mode weekdays (1=Mon, 127=all)', type: 'number', role: 'level', min: 1, max: 127, read: true, write: true }, native: {}
+        });
+        await this.setObjectNotExistsAsync('control.manualPower', {
+            type: 'state', common: { name: 'Manual mode power', type: 'number', unit: 'W', role: 'level.power', min: 0, max: 3000, read: true, write: true }, native: {}
+        });
+        await this.setObjectNotExistsAsync('control.manualEnable', {
+            type: 'state', common: { name: 'Manual mode enable', type: 'boolean', role: 'switch', read: true, write: true }, native: {}
         });
 
         await this.subscribeStatesAsync('control.*');
@@ -318,6 +330,8 @@ class MarstekVenusAdapter extends utils.Adapter {
         try {
             const result = await this.sendRequest('PV.GetStatus', { id: 0 });
             await this.setStateChangedAsync('power.pv', { val: result.pv_power, ack: true });
+            await this.setStateChangedAsync('power.pvVoltage', { val: result.pv_voltage, ack: true });
+            await this.setStateChangedAsync('power.pvCurrent', { val: result.pv_current, ack: true });
         } catch (e) {
         }
     }
@@ -344,7 +358,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 
     async pollEMStatus() {
         try {
-            await this.sendRequest('EM.GetStatus', { id: 0 });
+            const result = await this.sendRequest('EM.GetStatus', { id: 0 });
+            await this.setStateChangedAsync('energymeter.ctState', { val: result.ct_state, ack: true });
+            await this.setStateChangedAsync('energymeter.powerA', { val: result.a_power, ack: true });
+            await this.setStateChangedAsync('energymeter.powerB', { val: result.b_power, ack: true });
+            await this.setStateChangedAsync('energymeter.powerC', { val: result.c_power, ack: true });
+            await this.setStateChangedAsync('energymeter.powerTotal', { val: result.total_power, ack: true });
         } catch (e) {
         }
     }
@@ -374,6 +393,21 @@ class MarstekVenusAdapter extends utils.Adapter {
                     config.passive_cfg = {
                         power: power?.val || 0,
                         cd_time: duration?.val || 300
+                    };
+                } else if (mode === 'Manual') {
+                    const timeNum = await this.getStateAsync('control.manualTimeNum');
+                    const startTime = await this.getStateAsync('control.manualStartTime');
+                    const endTime = await this.getStateAsync('control.manualEndTime');
+                    const weekdays = await this.getStateAsync('control.manualWeekdays');
+                    const power = await this.getStateAsync('control.manualPower');
+                    const enable = await this.getStateAsync('control.manualEnable');
+                    config.manual_cfg = {
+                        time_num: timeNum?.val || 0,
+                        start_time: startTime?.val || '00:00',
+                        end_time: endTime?.val || '23:59',
+                        week_set: weekdays?.val || 127,
+                        power: power?.val || 100,
+                        enable: enable?.val ? 1 : 0
                     };
                 }
 
