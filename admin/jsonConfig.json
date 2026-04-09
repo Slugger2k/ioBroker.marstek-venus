@@ -1,0 +1,33 @@
+{
+  "type": "panel",
+  "items": [
+    {
+      "type": "text",
+      "name": "ipAddress",
+      "label": "Device IP Address",
+      "placeholder": "192.168.1.xxx"
+    },
+    {
+      "type": "number",
+      "name": "udpPort",
+      "label": "UDP Port",
+      "min": 1,
+      "max": 65535,
+      "default": 30000
+    },
+    {
+      "type": "number",
+      "name": "pollInterval",
+      "label": "Poll interval (ms)",
+      "min": 500,
+      "max": 60000,
+      "default": 1000
+    },
+    {
+      "type": "checkbox",
+      "name": "autoDiscovery",
+      "label": "Auto discover devices",
+      "default": true
+    }
+  ]
+}
