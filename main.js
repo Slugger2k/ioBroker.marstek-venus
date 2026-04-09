@@ -15,6 +15,7 @@ class MarstekVenusAdapter extends utils.Adapter {
         this.requestId = 1;
         this.pendingRequests = new Map();
         this.pollInterval = null;
+        this.slowPollInterval = null;
         this.discoveredIP = null;
         this._pollingInProgress = false;
 
@@ -332,8 +333,39 @@ class MarstekVenusAdapter extends utils.Adapter {
 
     startPolling() {
         this.log.info('Starting polling loop');
-        this.pollInterval = setInterval(() => this.poll(), this.config.pollInterval || 5000);
+        this.pollInterval = setInterval(() => this.poll(), this.config.pollInterval || 10000);
+        this.startSlowPolling();
         this.poll();
+    }
+
+    startSlowPolling() {
+        this.log.info('Starting slow polling loop (info + network every 10 min)');
+        this.slowPollInterval = setInterval(() => this.pollSlow(), 600000);
+        this.pollSlow();
+    }
+
+    async pollSlow() {
+        await this.pollInfoStatus();
+        await this.pollWifiStatus();
+        await this.pollBLEStatus();
+    }
+
+    async pollInfoStatus() {
+        try {
+            const result = await this.sendRequest('ES.GetInfo', { id: 0 });
+            if (result.device !== undefined && result.device !== null) {
+                await this.setStateChangedAsync('info.device', { val: result.device, ack: true });
+            }
+            if (result.ver !== undefined && result.ver !== null) {
+                await this.setStateChangedAsync('info.firmware', { val: result.ver, ack: true });
+            }
+            if ((result.ble_mac !== undefined && result.ble_mac !== null) || (result.wifi_mac !== undefined && result.wifi_mac !== null)) {
+                const mac = result.ble_mac || result.wifi_mac;
+                await this.setStateChangedAsync('info.mac', { val: mac, ack: true });
+            }
+        } catch (e) {
+            this.log.warn(`ES.GetInfo failed: ${e.message}`);
+        }
     }
 
     async poll() {
@@ -346,8 +378,6 @@ class MarstekVenusAdapter extends utils.Adapter {
             await this.pollESStatus();
             await this.pollBatteryStatus();
             await this.pollPVStatus();
-            await this.pollWifiStatus();
-            await this.pollBLEStatus();
             await this.pollEMStatus();
             await this.pollModeStatus();
 
@@ -562,6 +592,7 @@ class MarstekVenusAdapter extends utils.Adapter {
             this.log.info('Shutting down Marstek Venus adapter');
             
             if (this.pollInterval) clearInterval(this.pollInterval);
+            if (this.slowPollInterval) clearInterval(this.slowPollInterval);
             if (this.socket) this.socket.close();
             
             this.pendingRequests.forEach((pending) => {
