@@ -1,518 +1,642 @@
+'use strict';
+
 const chai = require('chai');
 const sinon = require('sinon');
+const dgram = require('node:dgram');
 const expect = chai.expect;
 
-class MockAdapter {
-    constructor(options = {}) {
-        this.name = options.name || 'adapter';
-        this.socket = null;
-        this.requestId = 1;
-        this.pendingRequests = new Map();
-        this.pollInterval = null;
-        this.discoveredIP = null;
-        this.config = {
-            autoDiscovery: false,
-            ipAddress: '192.168.1.100',
-            udpPort: 30000,
-            pollInterval: 1000
+// Mock external dependencies FIRST
+const mockSocket = {
+    on: sinon.stub(),
+    bind: sinon.stub().callsFake((port, cb) => typeof cb === 'function' && cb(null)),
+    setBroadcast: sinon.stub(),
+    address: sinon.stub().returns({ address: '0.0.0.0', port: 12345 }),
+    send: sinon.stub().callsFake((buf, offset, len, port, addr, cb) => {
+        if (typeof cb === 'function') {
+            cb(null);
+        }
+        return null;
+    }),
+    close: sinon.stub()
+};
+sinon.stub(dgram, 'createSocket').returns(mockSocket);
+
+// Mock the adapter core base class
+class MockAdapterBase {
+    constructor(options) {
+        this.name = options.name;
+        this.config = options.config;
+        this.log = {
+            info: sinon.stub(),
+            debug: sinon.stub(),
+            warn: sinon.stub(),
+            error: sinon.stub()
         };
-        this.setStateChangedAsyncSpy = sinon.stub().resolves({});
-        this.setObjectNotExistsAsyncSpy = sinon.stub().resolves({});
-        this.setStateAsync = sinon.stub().resolves({});
-        this.getStateAsync = sinon.stub().resolves(null);
+        this.setStateAsync = sinon.stub().resolves();
+        this.setStateChangedAsync = sinon.stub().resolves();
+        this.setObjectNotExistsAsync = sinon.stub().resolves();
+        this.getStateAsync = sinon.stub().resolves();
         this.subscribeStatesAsync = sinon.stub().resolves();
-        this.log = { info: sinon.stub(), debug: sinon.stub(), warn: sinon.stub(), error: sinon.stub() };
+        this.sendTo = sinon.stub();
+        this._eventHandlers = {};
     }
 
-    async initStates() {
-        const creates = [
-            'info.device', 'info.firmware', 'info.mac', 'info.connection',
-            'battery.soc', 'battery.temperature', 'battery.capacity', 'battery.ratedCapacity',
-            'battery.chargingAllowed', 'battery.dischargingAllowed',
-            'power.pv', 'power.pvVoltage', 'power.pvCurrent', 'power.grid', 'power.battery', 'power.load',
-            'energy.pvTotal', 'energy.gridImport', 'energy.gridExport', 'energy.loadTotal',
-            'control.mode', 'control.passivePower', 'control.passiveDuration',
-            'control.manualTimeNum', 'control.manualStartTime', 'control.manualEndTime',
-            'control.manualWeekdays', 'control.manualPower', 'control.manualEnable',
-            'network', 'network.ip', 'network.ssid', 'network.rssi', 'network.bleState',
-            'energymeter', 'energymeter.ctState', 'energymeter.powerA', 'energymeter.powerB',
-            'energymeter.powerC', 'energymeter.powerTotal'
-        ];
-        for (const id of creates) {
-            await this.setObjectNotExistsAsyncSpy(id, {});
+    on(event, handler) {
+        this._eventHandlers[event] = handler;
+    }
+
+    emit(event, ...args) {
+        if (this._eventHandlers[event]) {
+            this._eventHandlers[event](...args);
         }
-        await this.subscribeStatesAsync('control.*');
-    }
-
-    async sendRequest(method, params = {}) {
-        return new Promise((resolve, reject) => {
-            const id = this.requestId++;
-            const timeout = setTimeout(() => {
-                this.pendingRequests.delete(id);
-                reject(new Error(`Request ${method} timed out`));
-            }, 5000);
-            this.pendingRequests.set(id, { resolve, reject, timeout });
-        });
-    }
-
-    handleResponse(response) {
-        if (response.id !== undefined && this.pendingRequests.has(response.id)) {
-            const pending = this.pendingRequests.get(response.id);
-            clearTimeout(pending.timeout);
-            this.pendingRequests.delete(response.id);
-            if (response.error) {
-                pending.reject(new Error(`API Error ${response.error.code}: ${response.error.message}`));
-            } else {
-                pending.resolve(response.result);
-            }
-        } else if (response.result && response.result.device) {
-            if (!this.config.ipAddress && response.result.ip) {
-                this.discoveredIP = response.result.ip;
-            }
-        }
-    }
-
-    async pollESStatus() {
-        const result = await this.sendRequest('ES.GetStatus', { id: 0 });
-        await this.setStateChangedAsyncSpy('power.pv', { val: result.pv_power, ack: true });
-        await this.setStateChangedAsyncSpy('power.grid', { val: result.ongrid_power, ack: true });
-        await this.setStateChangedAsyncSpy('power.battery', { val: result.bat_power, ack: true });
-        await this.setStateChangedAsyncSpy('power.load', { val: result.offgrid_power, ack: true });
-        await this.setStateChangedAsyncSpy('energy.pvTotal', { val: result.total_pv_energy, ack: true });
-        await this.setStateChangedAsyncSpy('energy.gridExport', { val: result.total_grid_output_energy, ack: true });
-        await this.setStateChangedAsyncSpy('energy.gridImport', { val: result.total_grid_input_energy, ack: true });
-        await this.setStateChangedAsyncSpy('energy.loadTotal', { val: result.total_load_energy, ack: true });
-        await this.setStateChangedAsyncSpy('battery.soc', { val: result.bat_soc, ack: true });
-    }
-
-    async pollBatteryStatus() {
-        const result = await this.sendRequest('Bat.GetStatus', { id: 0 });
-        await this.setStateChangedAsyncSpy('battery.soc', { val: result.soc, ack: true });
-        await this.setStateChangedAsyncSpy('battery.temperature', { val: result.bat_temp, ack: true });
-        await this.setStateChangedAsyncSpy('battery.capacity', { val: result.bat_capacity, ack: true });
-        await this.setStateChangedAsyncSpy('battery.ratedCapacity', { val: result.rated_capacity, ack: true });
-        await this.setStateChangedAsyncSpy('battery.chargingAllowed', { val: result.charg_flag, ack: true });
-        await this.setStateChangedAsyncSpy('battery.dischargingAllowed', { val: result.dischrg_flag, ack: true });
-    }
-
-    async pollPVStatus() {
-        try {
-            const result = await this.sendRequest('PV.GetStatus', { id: 0 });
-            await this.setStateChangedAsyncSpy('power.pv', { val: result.pv_power, ack: true });
-            await this.setStateChangedAsyncSpy('power.pvVoltage', { val: result.pv_voltage, ack: true });
-            await this.setStateChangedAsyncSpy('power.pvCurrent', { val: result.pv_current, ack: true });
-        } catch (e) {
-            this.log.debug(`Poll PV status failed: ${e.message}`);
-        }
-    }
-
-    async pollWifiStatus() {
-        try {
-            const result = await this.sendRequest('Wifi.GetStatus', { id: 0 });
-            await this.setStateChangedAsyncSpy('network.ip', { val: result.sta_ip, ack: true });
-            await this.setStateChangedAsyncSpy('network.ssid', { val: result.ssid, ack: true });
-            await this.setStateChangedAsyncSpy('network.rssi', { val: result.rssi, ack: true });
-        } catch (e) {
-            this.log.debug(`Poll WiFi status failed: ${e.message}`);
-        }
-    }
-
-    async pollBLEStatus() {
-        try {
-            const result = await this.sendRequest('BLE.GetStatus', { id: 0 });
-            await this.setStateChangedAsyncSpy('network.bleState', { val: result.state, ack: true });
-        } catch (e) {
-            this.log.debug(`Poll BLE status failed: ${e.message}`);
-        }
-    }
-
-    async pollEMStatus() {
-        try {
-            const result = await this.sendRequest('EM.GetStatus', { id: 0 });
-            await this.setStateChangedAsyncSpy('energymeter.ctState', { val: result.ct_state, ack: true });
-            await this.setStateChangedAsyncSpy('energymeter.powerA', { val: result.a_power, ack: true });
-            await this.setStateChangedAsyncSpy('energymeter.powerB', { val: result.b_power, ack: true });
-            await this.setStateChangedAsyncSpy('energymeter.powerC', { val: result.c_power, ack: true });
-            await this.setStateChangedAsyncSpy('energymeter.powerTotal', { val: result.total_power, ack: true });
-        } catch (e) {
-            this.log.debug(`Poll EM status failed: ${e.message}`);
-        }
-    }
-
-    async pollModeStatus() {
-        const result = await this.sendRequest('ES.GetMode', { id: 0 });
-        await this.setStateChangedAsyncSpy('control.mode', { val: result.mode, ack: true });
-    }
-
-    async poll() {
-        try {
-            await this.pollESStatus();
-            await this.pollBatteryStatus();
-            await this.pollPVStatus();
-            await this.pollWifiStatus();
-            await this.pollBLEStatus();
-            await this.pollEMStatus();
-            await this.pollModeStatus();
-            await this.setStateAsync('info.connection', { val: true, ack: true });
-        } catch (err) {
-            await this.setStateAsync('info.connection', { val: false, ack: true });
-        }
-    }
-
-    async onStateChange(id, state) {
-        if (!state || state.ack) return;
-        const stateName = id.split('.').pop();
-        try {
-            if (stateName === 'mode') {
-                const mode = state.val;
-                let config = { mode };
-                if (mode === 'Auto') {
-                    config.auto_cfg = { enable: 1 };
-                } else if (mode === 'AI') {
-                    config.ai_cfg = { enable: 1 };
-                } else if (mode === 'Passive') {
-                    const power = await this.getStateAsync('control.passivePower');
-                    const duration = await this.getStateAsync('control.passiveDuration');
-                    config.passive_cfg = {
-                        power: power?.val || 0,
-                        cd_time: duration?.val || 300
-                    };
-                } else if (mode === 'Manual') {
-                    const timeNum = await this.getStateAsync('control.manualTimeNum');
-                    const startTime = await this.getStateAsync('control.manualStartTime');
-                    const endTime = await this.getStateAsync('control.manualEndTime');
-                    const weekdays = await this.getStateAsync('control.manualWeekdays');
-                    const power = await this.getStateAsync('control.manualPower');
-                    const enable = await this.getStateAsync('control.manualEnable');
-                    config.manual_cfg = {
-                        time_num: timeNum?.val || 0,
-                        start_time: startTime?.val || '00:00',
-                        end_time: endTime?.val || '23:59',
-                        week_set: weekdays?.val || 127,
-                        power: power?.val || 100,
-                        enable: enable?.val ? 1 : 0
-                    };
-                }
-                await this.sendRequest('ES.SetMode', { id: 0, config });
-                await this.setStateAsync(id, { val: mode, ack: true });
-            }
-        } catch (err) {
-            this.log.error(`Failed to set ${stateName}: ${err.message}`);
-        }
-    }
-
-    startPolling() {
-        this.pollInterval = setInterval(() => this.poll(), this.config.pollInterval || 1000);
     }
 }
 
-describe('MarstekVenusAdapter', () => {
+// Mock @iobroker/adapter-core
+const mockAdapterCore = {
+    Adapter: MockAdapterBase
+};
+require.cache[require.resolve('@iobroker/adapter-core')] = { exports: mockAdapterCore };
+
+// Now load the actual adapter
+delete require.cache[require.resolve('../main.js')];
+const Adapter = require('../main.js');
+
+describe('MarstekVenusAdapter', function() {
     let adapter;
+    let sandbox;
+    let clock;
+
+    this.timeout(20000);
 
     beforeEach(() => {
-        adapter = new MockAdapter();
+        sandbox = sinon.createSandbox();
+        clock = sandbox.useFakeTimers();
+        
+        // Reset socket mock completely
+        mockSocket.on.resetHistory();
+        mockSocket.bind.reset();
+        mockSocket.bind.callsFake((port, cb) => {
+            if (typeof cb === 'function') {
+                cb(null);
+            }
+        });
+        mockSocket.setBroadcast.resetHistory();
+        mockSocket.address.resetHistory();
+        mockSocket.send.reset();
+        mockSocket.send.callsFake((buf, offset, len, port, addr, cb) => {
+            if (typeof cb === 'function') {
+                cb(null);
+            }
+            return null;
+        });
+        mockSocket.close.resetHistory();
+
+        // Create fresh adapter instance
+        adapter = Adapter({
+            config: {
+                autoDiscovery: false,
+                ipAddress: '192.168.1.100',
+                udpPort: 30000,
+                pollInterval: 10000
+            }
+        });
+
+        // Clear pending requests and intervals from any accidental polls triggered during setup
+        adapter.pendingRequests.clear();
+        if (adapter.pollInterval) {
+            clearInterval(adapter.pollInterval);
+            adapter.pollInterval = null;
+        }
+        if (adapter.slowPollInterval) {
+            clearInterval(adapter.slowPollInterval);
+            adapter.slowPollInterval = null;
+        }
+        adapter._pollingInProgress = false;
+        adapter._pollFailureCount = 0;
     });
 
-    describe('constructor', () => {
-        it('should initialize with requestId starting at 1', () => {
+    afterEach(() => {
+        sandbox.restore();
+        clock.restore();
+        adapter = null;
+    });
+
+    describe('Constructor', () => {
+        it('initializes all properties correctly', () => {
             expect(adapter.requestId).to.equal(1);
-        });
-
-        it('should initialize with empty pendingRequests Map', () => {
             expect(adapter.pendingRequests).to.be.instanceOf(Map);
-            expect(adapter.pendingRequests.size).to.equal(0);
-        });
-
-        it('should initialize with null pollInterval', () => {
             expect(adapter.pollInterval).to.be.null;
-        });
-
-        it('should initialize with null discoveredIP', () => {
+            expect(adapter.slowPollInterval).to.be.null;
             expect(adapter.discoveredIP).to.be.null;
+            expect(adapter._pollingInProgress).to.be.false;
+            expect(adapter._pollFailureCount).to.equal(0);
+        });
+
+        it('binds all lifecycle event handlers', () => {
+            expect(adapter._eventHandlers.ready).to.exist;
+            expect(adapter._eventHandlers.stateChange).to.exist;
+            expect(adapter._eventHandlers.unload).to.exist;
+            expect(adapter._eventHandlers.message).to.exist;
         });
     });
 
-    describe('initStates', () => {
+    describe('Lifecycle methods', () => {
+        describe('onReady()', () => {
+            it('initializes states and creates socket', async () => {
+                await adapter.onReady();
+
+                expect(adapter.setObjectNotExistsAsync.callCount).to.equal(40);
+                expect(adapter.subscribeStatesAsync.calledWith('control.*')).to.be.true;
+                expect(dgram.createSocket.calledWith('udp4')).to.be.true;
+                expect(mockSocket.bind.called).to.be.true;
+                expect(mockSocket.setBroadcast.calledWith(true)).to.be.true;
+            });
+
+            it('starts polling when IP is configured', async () => {
+                await adapter.onReady();
+                expect(adapter.pollInterval).to.not.be.null;
+                expect(adapter.slowPollInterval).to.not.be.null;
+            });
+
+            it('sets default control states', async () => {
+                await adapter.onReady();
+                expect(adapter.setStateAsync.calledWith('control.mode', { val: 'Auto', ack: true })).to.be.true;
+            });
+        });
+
+        describe('onUnload()', () => {
+            it('cleans up all resources', (done) => {
+                adapter.socket = mockSocket;
+                adapter.pollInterval = setInterval(() => {}, 1000);
+                adapter.slowPollInterval = setInterval(() => {}, 1000);
+                
+                const timeout = setTimeout(() => {}, 1000);
+                const rejectSpy = sandbox.stub();
+                adapter.pendingRequests.set(1, { timeout, reject: rejectSpy });
+
+                adapter.onUnload(() => {
+                    expect(mockSocket.close.calledOnce).to.be.true;
+                    expect(rejectSpy.calledOnce).to.be.true;
+                    done();
+                });
+            });
+        });
+
+        describe('onMessage()', () => {
+            it('handles discover command', async () => {
+                adapter.discoverDevices = sandbox.stub().resolves();
+                adapter.discoveredIP = '192.168.1.100';
+
+                await adapter.onMessage({
+                    command: 'discover',
+                    from: 'admin.0',
+                    callback: 123
+                });
+
+                expect(adapter.discoverDevices.called).to.be.true;
+                expect(adapter.sendTo.called).to.be.true;
+            });
+        });
+    });
+
+    describe('sendRequest()', () => {
         beforeEach(async () => {
-            await adapter.initStates();
+            await adapter.onReady();
+            adapter.pollInterval = null;
+            adapter.slowPollInterval = null;
+            adapter.pendingRequests.clear();
         });
 
-        it('should create all required states', () => {
-            const calls = adapter.setObjectNotExistsAsyncSpy.getCalls();
-            const createdIds = calls.map(c => c.args[0]);
+        it('rejects when no target IP', async () => {
+            adapter.config.ipAddress = '';
+            adapter.discoveredIP = null;
 
-            expect(createdIds).to.include('info.device');
-            expect(createdIds).to.include('info.firmware');
-            expect(createdIds).to.include('info.mac');
-            expect(createdIds).to.include('info.connection');
-            expect(createdIds).to.include('battery.soc');
-            expect(createdIds).to.include('battery.temperature');
-            expect(createdIds).to.include('battery.capacity');
-            expect(createdIds).to.include('battery.ratedCapacity');
-            expect(createdIds).to.include('battery.chargingAllowed');
-            expect(createdIds).to.include('battery.dischargingAllowed');
-            expect(createdIds).to.include('power.pv');
-            expect(createdIds).to.include('power.pvVoltage');
-            expect(createdIds).to.include('power.pvCurrent');
-            expect(createdIds).to.include('power.grid');
-            expect(createdIds).to.include('power.battery');
-            expect(createdIds).to.include('power.load');
-            expect(createdIds).to.include('energy.pvTotal');
-            expect(createdIds).to.include('energy.gridImport');
-            expect(createdIds).to.include('energy.gridExport');
-            expect(createdIds).to.include('energy.loadTotal');
-            expect(createdIds).to.include('control.mode');
-            expect(createdIds).to.include('control.passivePower');
-            expect(createdIds).to.include('control.passiveDuration');
-            expect(createdIds).to.include('control.manualTimeNum');
-            expect(createdIds).to.include('control.manualStartTime');
-            expect(createdIds).to.include('control.manualEndTime');
-            expect(createdIds).to.include('control.manualWeekdays');
-            expect(createdIds).to.include('control.manualPower');
-            expect(createdIds).to.include('control.manualEnable');
-            expect(createdIds).to.include('network');
-            expect(createdIds).to.include('network.ip');
-            expect(createdIds).to.include('network.ssid');
-            expect(createdIds).to.include('network.rssi');
-            expect(createdIds).to.include('network.bleState');
-            expect(createdIds).to.include('energymeter');
-            expect(createdIds).to.include('energymeter.ctState');
-            expect(createdIds).to.include('energymeter.powerA');
-            expect(createdIds).to.include('energymeter.powerB');
-            expect(createdIds).to.include('energymeter.powerC');
-            expect(createdIds).to.include('energymeter.powerTotal');
+            try {
+                await adapter.sendRequest('ES.GetStatus');
+                expect.fail('Should reject');
+            } catch (e) {
+                expect(e.message).to.equal('No target IP configured');
+            }
         });
 
-        it('should subscribe to control states', () => {
-            expect(adapter.subscribeStatesAsync.calledWith('control.*')).to.be.true;
-        });
-    });
-
-    describe('sendRequest', () => {
-        it('should increment requestId for each request', async () => {
-            const originalId = adapter.requestId;
+        it('adds request to pending queue', async () => {
+            const promise = adapter.sendRequest('ES.GetStatus');
+            expect(adapter.pendingRequests.size).to.equal(1);
             
-            adapter.sendRequest('ES.GetStatus', {});
-            const idAfterFirst = adapter.requestId;
-            adapter.sendRequest('Bat.GetStatus', {});
-            const idAfterSecond = adapter.requestId;
-
-            expect(idAfterFirst).to.be.greaterThan(originalId);
-            expect(idAfterSecond).to.be.greaterThan(idAfterFirst);
+            const req = adapter.pendingRequests.values().next().value;
+            clearTimeout(req.timeout);
+            req.resolve({ ok: true });
+            
+            expect(await promise).to.deep.equal({ ok: true });
         });
 
-        it('should add pending request to map', async () => {
-            const promise = adapter.sendRequest('ES.GetStatus', {});
-            expect(adapter.pendingRequests.size).to.be.equal(1);
-            await promise.catch(() => {});
-        });
-
-        it('should reject on timeout', async () => {
-            const clock = sinon.useFakeTimers();
-
-            const promise = adapter.sendRequest('ES.GetStatus', {});
-            clock.tick(5001);
+        it('handles timeout correctly', async () => {
+            const promise = adapter.sendRequest('ES.GetStatus');
+            clock.tick(20001);
             
             try {
                 await promise;
-                expect.fail('Should have rejected');
+                expect.fail('Should timeout');
             } catch (e) {
                 expect(e.message).to.include('timed out');
             }
+            expect(adapter.pendingRequests.size).to.equal(0);
+        });
 
-            clock.restore();
+        it('handles socket send errors', async () => {
+            mockSocket.send.callsArgWith(5, new Error('Send failed'));
+            
+            try {
+                await adapter.sendRequest('ES.GetStatus');
+                expect.fail('Should reject');
+            } catch (e) {
+                expect(e.message).to.equal('Send failed');
+            }
         });
     });
 
-    describe('handleResponse', () => {
-        it('should resolve pending request on success', async () => {
-            const promise = adapter.sendRequest('ES.GetStatus', {});
-            const requestId = adapter.requestId - 1;
-
-            adapter.handleResponse({
-                id: requestId,
-                result: { bat_soc: 98 }
-            });
-
-            const result = await promise;
-            expect(result).to.deep.equal({ bat_soc: 98 });
+    describe('handleResponse()', () => {
+        beforeEach(async () => {
+            await adapter.onReady();
         });
 
-        it('should reject pending request on error', async () => {
-            const promise = adapter.sendRequest('ES.GetStatus', {});
-            const requestId = adapter.requestId - 1;
+        it('resolves pending request on success', async () => {
+            const promise = adapter.sendRequest('ES.GetStatus');
+            const reqId = adapter.requestId - 1;
 
-            adapter.handleResponse({
-                id: requestId,
-                error: { code: -32600, message: 'Invalid Request' }
-            });
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ id: reqId, result: { soc: 98 } })),
+                { address: '192.168.1.100' }
+            );
+
+            expect(await promise).to.deep.equal({ soc: 98 });
+        });
+
+        it('rejects on error response', async () => {
+            const promise = adapter.sendRequest('ES.GetStatus');
+            const reqId = adapter.requestId - 1;
+
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ id: reqId, error: { code: -1, message: 'Error' } })),
+                { address: '192.168.1.100' }
+            );
 
             try {
                 await promise;
-                expect.fail('Should have rejected');
+                expect.fail('Should reject');
             } catch (e) {
-                expect(e.message).to.include('Invalid Request');
+                expect(e.message).to.include('Error');
             }
         });
 
-        it('should set discoveredIP on discovery response when no ip configured', () => {
+        it('handles discovery responses', () => {
             adapter.config.ipAddress = '';
-            adapter.handleResponse({
-                result: {
-                    device: 'VenusC',
-                    ver: 111,
-                    ip: '192.168.1.100',
-                    ble_mac: '123456789012'
-                }
-            });
+            
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ result: { device: 'Venus C', ip: '192.168.1.100' } })),
+                { address: '192.168.1.100' }
+            );
 
             expect(adapter.discoveredIP).to.equal('192.168.1.100');
         });
 
-        it('should not overwrite configured ipAddress on discovery', () => {
+        it('ignores discovery when IP already configured', () => {
             adapter.config.ipAddress = '192.168.1.50';
-            adapter.handleResponse({
-                result: {
-                    device: 'VenusC',
-                    ip: '192.168.1.100'
+            adapter.startPolling = sandbox.stub();
+            
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ result: { device: 'Venus C', ip: '192.168.1.100' } })),
+                { address: '192.168.1.100' }
+            );
+
+            expect(adapter.discoveredIP).to.be.null;
+            expect(adapter.log.info.calledWithMatch(/using configured IP/)).to.be.true;
+        });
+
+        it('warns on discovery response without IP', () => {
+            adapter.config.ipAddress = '';
+            
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ result: { device: 'Venus C' } })),
+                { address: '192.168.1.100' }
+            );
+
+            expect(adapter.log.warn.calledWithMatch(/without IP address/)).to.be.true;
+        });
+
+        it('ignores unsolicited messages', () => {
+            adapter.handleResponse(
+                Buffer.from(JSON.stringify({ method: 'SomeEvent', data: 123 })),
+                { address: '192.168.1.100' }
+            );
+
+            expect(adapter.log.debug.calledWithMatch(/unsolicited message/)).to.be.true;
+        });
+
+        it('ignores invalid JSON', () => {
+            adapter.handleResponse(Buffer.from('invalid json'), { address: '192.168.1.100' });
+            expect(adapter.log.debug.calledWithMatch(/Invalid response/)).to.be.true;
+        });
+    });
+
+    describe('Operating modes', () => {
+        beforeEach(async () => {
+            await adapter.onReady();
+            adapter.sendRequest = sandbox.stub().resolves();
+        });
+
+        it('handles Auto mode', async () => {
+            await adapter.onStateChange('control.mode', { val: 'Auto', ack: false });
+            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
+                config: { mode: 'Auto', auto_cfg: { enable: 1 } }
+            }))).to.be.true;
+        });
+
+        it('handles AI mode', async () => {
+            await adapter.onStateChange('control.mode', { val: 'AI', ack: false });
+            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
+                config: { mode: 'AI', ai_cfg: { enable: 1 } }
+            }))).to.be.true;
+        });
+
+        it('handles Passive mode', async () => {
+            adapter.getStateAsync.withArgs('control.passivePower').resolves({ val: 500 });
+            adapter.getStateAsync.withArgs('control.passiveDuration').resolves({ val: 600 });
+
+            await adapter.onStateChange('control.mode', { val: 'Passive', ack: false });
+            
+            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
+                config: { mode: 'Passive', passive_cfg: { power: 500, cd_time: 600 } }
+            }))).to.be.true;
+        });
+
+        it('handles Manual mode', async () => {
+            adapter.getStateAsync.withArgs('control.manualTimeNum').resolves({ val: 1 });
+            adapter.getStateAsync.withArgs('control.manualStartTime').resolves({ val: '08:00' });
+            adapter.getStateAsync.withArgs('control.manualEndTime').resolves({ val: '20:00' });
+            adapter.getStateAsync.withArgs('control.manualWeekdays').resolves({ val: 127 });
+            adapter.getStateAsync.withArgs('control.manualPower').resolves({ val: 1000 });
+            adapter.getStateAsync.withArgs('control.manualEnable').resolves({ val: true });
+
+            await adapter.onStateChange('control.mode', { val: 'Manual', ack: false });
+            
+            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match.has('config'))).to.be.true;
+        });
+    });
+
+    describe('Poll functions', () => {
+        beforeEach(async () => {
+            adapter.pollInterval = null;
+            adapter.slowPollInterval = null;
+            adapter._pollingInProgress = false;
+        });
+
+        it('updates connection state on successful poll', async () => {
+            adapter.pollESStatus = sandbox.stub().resolves();
+            adapter.pollBatteryStatus = sandbox.stub().resolves();
+            adapter.pollPVStatus = sandbox.stub().resolves();
+            adapter.pollEMStatus = sandbox.stub().resolves();
+            adapter.pollModeStatus = sandbox.stub().resolves();
+
+            await adapter.poll();
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: true, ack: true })).to.be.true;
+            expect(adapter._pollFailureCount).to.equal(0);
+        });
+
+        it('handles poll cycle throw', async () => {
+            sandbox.stub(adapter, 'pollWithRetry').callsFake(async () => {
+                throw new Error('Poll error');
+            });
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(1);
+        });
+
+        it('handles poll cycle throw with 3 failures', async () => {
+            sandbox.stub(adapter, 'pollWithRetry').callsFake(async () => {
+                throw new Error('Poll error');
+            });
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(1);
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(2);
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(3);
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.true;
+        });
+
+        it('handles pollWithRetry returning false', async () => {
+            sandbox.stub(adapter, 'pollWithRetry').resolves(false);
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(1);
+        });
+
+        it('does not mark connection false on single poll failure', async () => {
+            sandbox.stub(adapter, 'pollWithRetry').callsFake(async (fn) => {
+                try {
+                    await fn();
+                    return true;
+                } catch (e) {
+                    return false;
                 }
             });
 
-            expect(adapter.discoveredIP).to.be.null;
+            await adapter.poll();
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.false;
+            expect(adapter._pollFailureCount).to.equal(1);
+        });
+
+        it('marks connection false after 3 consecutive poll failures', async () => {
+            sandbox.stub(adapter, 'pollWithRetry').callsFake(async (fn) => {
+                try {
+                    await fn();
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            });
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(1);
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.false;
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(2);
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.false;
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(3);
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.true;
+        });
+
+        it('resets failure count on successful poll after failures', async () => {
+            let pollCallCount = 0;
+            sandbox.stub(adapter, 'pollWithRetry').callsFake(async (fn) => {
+                pollCallCount++;
+                try {
+                    await fn();
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            });
+
+            // First two polls fail (all poll functions fail)
+            adapter.pollESStatus = sandbox.stub().rejects(new Error('Failed'));
+            adapter.pollBatteryStatus = sandbox.stub().rejects(new Error('Failed'));
+            adapter.pollPVStatus = sandbox.stub().rejects(new Error('Failed'));
+            adapter.pollEMStatus = sandbox.stub().rejects(new Error('Failed'));
+            adapter.pollModeStatus = sandbox.stub().rejects(new Error('Failed'));
+
+            await adapter.poll();
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(2);
+
+            // Third poll succeeds
+            adapter.pollESStatus = sandbox.stub().resolves();
+            adapter.pollBatteryStatus = sandbox.stub().resolves();
+            adapter.pollPVStatus = sandbox.stub().resolves();
+            adapter.pollEMStatus = sandbox.stub().resolves();
+            adapter.pollModeStatus = sandbox.stub().resolves();
+
+            await adapter.poll();
+            expect(adapter._pollFailureCount).to.equal(0);
+            expect(adapter.setStateAsync.calledWith('info.connection', { val: true, ack: true })).to.be.true;
+        });
+
+        it('skips overlapping polls', async () => {
+            adapter._pollingInProgress = true;
+            
+            await adapter.poll();
+            expect(adapter._pollingInProgress).to.be.true;
+        });
+
+        it('retries failed poll before marking failure', async () => {
+            const setTimeoutStub = sandbox.stub(global, 'setTimeout').callsFake((fn) => {
+                fn();
+                return 1;
+            });
+
+            let attempts = 0;
+            adapter.pollESStatus = sandbox.stub().callsFake(() => {
+                attempts++;
+                if (attempts < 2) {
+                    return Promise.reject(new Error('Transient failure'));
+                }
+                return Promise.resolve();
+            });
+            adapter.pollBatteryStatus = sandbox.stub().resolves();
+            adapter.pollPVStatus = sandbox.stub().resolves();
+            adapter.pollEMStatus = sandbox.stub().resolves();
+            adapter.pollModeStatus = sandbox.stub().resolves();
+
+            await adapter.poll();
+            expect(attempts).to.equal(2);
+            expect(adapter._pollFailureCount).to.equal(0);
+        });
+
+        it('returns false when all retry attempts fail', async () => {
+            sandbox.stub(global, 'setTimeout').callsFake((fn) => {
+                fn();
+                return 1;
+            });
+            adapter.pollESStatus = sandbox.stub().rejects(new Error('Permanent failure'));
+
+            const result = await adapter.pollWithRetry(() => adapter.pollESStatus());
+            expect(result).to.be.false;
+        });
+
+        it('returns true on successful attempt', async () => {
+            sandbox.stub(global, 'setTimeout').callsFake((fn) => {
+                fn();
+                return 1;
+            });
+            adapter.pollESStatus = sandbox.stub().resolves();
+
+            const result = await adapter.pollWithRetry(() => adapter.pollESStatus());
+            expect(result).to.be.true;
         });
     });
 
-    describe('pollESStatus', () => {
-        it('should set ES status states with correct values', async () => {
-            adapter.sendRequest = async () => ({
-                pv_power: 580,
-                ongrid_power: 100,
-                bat_power: 0,
-                offgrid_power: 0,
+    describe('All helper methods', () => {
+        beforeEach(async () => {
+            await adapter.onReady();
+        });
+
+        it('pollESStatus updates all power states', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
+                pv_power: 500,
+                ongrid_power: 200,
+                bat_power: -100,
+                offgrid_power: 150,
+                bat_soc: 85,
                 total_pv_energy: 1000,
-                total_grid_output_energy: 500,
-                total_grid_input_energy: 200,
-                total_load_energy: 300,
-                bat_soc: 98
+                total_grid_output_energy: 200,
+                total_grid_input_energy: 150,
+                total_load_energy: 300
             });
 
             await adapter.pollESStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'power.pv').val).to.equal(580);
-            expect(updates.find(u => u.id === 'power.grid').val).to.equal(100);
-            expect(updates.find(u => u.id === 'power.battery').val).to.equal(0);
-            expect(updates.find(u => u.id === 'power.load').val).to.equal(0);
-            expect(updates.find(u => u.id === 'energy.pvTotal').val).to.equal(1000);
-            expect(updates.find(u => u.id === 'energy.gridExport').val).to.equal(500);
-            expect(updates.find(u => u.id === 'energy.gridImport').val).to.equal(200);
-            expect(updates.find(u => u.id === 'energy.loadTotal').val).to.equal(300);
-            expect(updates.find(u => u.id === 'battery.soc').val).to.equal(98);
+            expect(adapter.setStateChangedAsync.callCount).to.equal(9);
         });
-    });
 
-    describe('pollBatteryStatus', () => {
-        it('should set battery status states with correct values', async () => {
-            adapter.sendRequest = async () => ({
-                soc: 98,
-                bat_temp: 25.0,
-                bat_capacity: 2508.0,
-                rated_capacity: 2560.0,
+        it('pollESStatus handles partial response', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
+                pv_power: 500
+            });
+
+            await adapter.pollESStatus();
+            expect(adapter.setStateChangedAsync.calledWith('power.pv', { val: 500, ack: true })).to.be.true;
+        });
+
+        it('pollBatteryStatus updates states', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
+                soc: 82,
+                bat_temp: 25,
+                bat_capacity: 5000,
+                rated_capacity: 10000,
                 charg_flag: true,
-                dischrg_flag: true
+                dischrg_flag: false
             });
 
             await adapter.pollBatteryStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'battery.soc').val).to.equal(98);
-            expect(updates.find(u => u.id === 'battery.temperature').val).to.equal(25.0);
-            expect(updates.find(u => u.id === 'battery.capacity').val).to.equal(2508.0);
-            expect(updates.find(u => u.id === 'battery.ratedCapacity').val).to.equal(2560.0);
-            expect(updates.find(u => u.id === 'battery.chargingAllowed').val).to.equal(true);
-            expect(updates.find(u => u.id === 'battery.dischargingAllowed').val).to.equal(true);
-        });
-    });
-
-    describe('pollPVStatus', () => {
-        it('should set PV status states with correct values', async () => {
-            adapter.sendRequest = async () => ({
-                pv_power: 580.0,
-                pv_voltage: 40.0,
-                pv_current: 12.0
-            });
-
-            await adapter.pollPVStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'power.pv').val).to.equal(580.0);
-            expect(updates.find(u => u.id === 'power.pvVoltage').val).to.equal(40.0);
-            expect(updates.find(u => u.id === 'power.pvCurrent').val).to.equal(12.0);
+            expect(adapter.setStateChangedAsync.calledWith('battery.temperature', { val: 25, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('battery.capacity', { val: 5000, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('battery.ratedCapacity', { val: 10000, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('battery.chargingAllowed', { val: true, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('battery.dischargingAllowed', { val: false, ack: true })).to.be.true;
         });
 
-        it('should handle PV status errors gracefully', async () => {
-            adapter.sendRequest = async () => { throw new Error('PV not connected'); };
-
-            await adapter.pollPVStatus();
-        });
-    });
-
-    describe('pollWifiStatus', () => {
-        it('should set WiFi status states with correct values', async () => {
-            adapter.sendRequest = async () => ({
+        it('pollWifiStatus updates states', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
                 sta_ip: '192.168.1.100',
-                ssid: 'MyHome',
-                rssi: -59
+                ssid: 'HomeWiFi',
+                rssi: -65
             });
 
             await adapter.pollWifiStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'network.ip').val).to.equal('192.168.1.100');
-            expect(updates.find(u => u.id === 'network.ssid').val).to.equal('MyHome');
-            expect(updates.find(u => u.id === 'network.rssi').val).to.equal(-59);
+            expect(adapter.setStateChangedAsync.calledWith('network.ip', { val: '192.168.1.100', ack: true })).to.be.true;
         });
 
-        it('should handle WiFi status errors gracefully', async () => {
-            adapter.sendRequest = async () => { throw new Error('WiFi error'); };
-
-            await adapter.pollWifiStatus();
-        });
-    });
-
-    describe('pollBLEStatus', () => {
-        it('should set BLE status state with correct value', async () => {
-            adapter.sendRequest = async () => ({
-                state: 'connect',
-                ble_mac: '123456789012'
+        it('re-throws poll errors for retry handling', async () => {
+            adapter.sendRequest = sandbox.stub().rejects(new Error('Test error'));
+            
+            await adapter.pollESStatus().catch(e => {
+                expect(e.message).to.equal('Test error');
             });
-
-            await adapter.pollBLEStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'network.bleState').val).to.equal('connect');
+            await adapter.pollBatteryStatus().catch(e => {
+                expect(e.message).to.equal('Test error');
+            });
+            await adapter.pollPVStatus().catch(e => {
+                expect(e.message).to.equal('Test error');
+            });
         });
 
-        it('should handle BLE status errors gracefully', async () => {
-            adapter.sendRequest = async () => { throw new Error('BLE error'); };
-
-            await adapter.pollBLEStatus();
-        });
-    });
-
-    describe('pollEMStatus', () => {
-        it('should set EM status states with correct values', async () => {
-            adapter.sendRequest = async () => ({
+        it('pollEMStatus updates states', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
                 ct_state: 1,
                 a_power: 100,
                 b_power: 200,
@@ -521,158 +645,213 @@ describe('MarstekVenusAdapter', () => {
             });
 
             await adapter.pollEMStatus();
-
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
-
-            expect(updates.find(u => u.id === 'energymeter.ctState').val).to.equal(1);
-            expect(updates.find(u => u.id === 'energymeter.powerA').val).to.equal(100);
-            expect(updates.find(u => u.id === 'energymeter.powerB').val).to.equal(200);
-            expect(updates.find(u => u.id === 'energymeter.powerC').val).to.equal(300);
-            expect(updates.find(u => u.id === 'energymeter.powerTotal').val).to.equal(600);
+            expect(adapter.setStateChangedAsync.calledWith('energymeter.ctState', { val: 1, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('energymeter.powerA', { val: 100, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('energymeter.powerB', { val: 200, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('energymeter.powerC', { val: 300, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('energymeter.powerTotal', { val: 600, ack: true })).to.be.true;
         });
 
-        it('should handle EM status errors gracefully', async () => {
-            adapter.sendRequest = async () => { throw new Error('EM error'); };
+        it('pollModeStatus updates control mode state', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
+                mode: 'AI'
+            });
 
-            await adapter.pollEMStatus();
+            await adapter.pollModeStatus();
+            expect(adapter.setStateChangedAsync.calledWith('control.mode', { val: 'AI', ack: true })).to.be.true;
+        });
+
+        it('pollModeStatus handles null mode', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({});
+
+            await adapter.pollModeStatus();
+            expect(adapter.setStateChangedAsync.called).to.be.false;
+        });
+
+        it('pollPVStatus handles null values', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({});
+
+            await adapter.pollPVStatus();
+            expect(adapter.setStateChangedAsync.called).to.be.false;
+        });
+
+        it('pollWifiStatus handles errors gracefully', async () => {
+            adapter.sendRequest = sandbox.stub().rejects(new Error('Network error'));
+
+            await adapter.pollWifiStatus();
+            expect(adapter.log.warn.calledWithMatch(/Wifi.GetStatus failed/)).to.be.true;
+        });
+
+        it('pollBLEStatus updates BLE state', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({ state: 'connected' });
+
+            await adapter.pollBLEStatus();
+            expect(adapter.setStateChangedAsync.calledWith('network.bleState', { val: 'connected', ack: true })).to.be.true;
+        });
+
+        it('pollBLEStatus handles errors gracefully', async () => {
+            adapter.sendRequest = sandbox.stub().rejects(new Error('BLE error'));
+
+            await adapter.pollBLEStatus();
+            expect(adapter.log.warn.calledWithMatch(/BLE.GetStatus failed/)).to.be.true;
+        });
+
+        it('pollInfoStatus updates device info states', async () => {
+            adapter.sendRequest = sandbox.stub().resolves({
+                device: 'Venus C',
+                ver: 123,
+                ble_mac: 'AA:BB:CC:DD:EE:FF'
+            });
+
+            await adapter.pollInfoStatus();
+            expect(adapter.setStateChangedAsync.calledWith('info.device', { val: 'Venus C', ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('info.firmware', { val: 123, ack: true })).to.be.true;
+            expect(adapter.setStateChangedAsync.calledWith('info.mac', { val: 'AA:BB:CC:DD:EE:FF', ack: true })).to.be.true;
+        });
+
+        it('pollInfoStatus handles errors gracefully', async () => {
+            adapter.sendRequest = sandbox.stub().rejects(new Error('Info error'));
+
+            await adapter.pollInfoStatus();
+            expect(adapter.log.warn.calledWithMatch(/ES.GetInfo failed/)).to.be.true;
         });
     });
 
-    describe('pollModeStatus', () => {
-        it('should set mode status state with correct value', async () => {
-            adapter.sendRequest = async () => ({ mode: 'Passive' });
+    describe('onReady - discovery path', () => {
+        beforeEach(async () => {
+            adapter.socket = mockSocket;
+        });
 
-            await adapter.pollModeStatus();
+        it('runs discovery when autoDiscovery enabled and no IP', async () => {
+            const adapter2 = Adapter({
+                config: {
+                    autoDiscovery: true,
+                    ipAddress: '',
+                    udpPort: 30000,
+                    pollInterval: 10000
+                }
+            });
+            adapter2.discoverDevices = sandbox.stub().resolves();
+            adapter2.pendingRequests.clear();
+            adapter2.socket = mockSocket;
 
-            const calls = adapter.setStateChangedAsyncSpy.getCalls();
-            const updates = calls.map(c => ({ id: c.args[0], val: c.args[1].val }));
+            await adapter2.onReady();
+            expect(adapter2.discoverDevices.called).to.be.true;
+        });
 
-            expect(updates.find(u => u.id === 'control.mode').val).to.equal('Passive');
+        it('logs configured device IP', async () => {
+            adapter.log.info.resetHistory();
+            adapter.config.ipAddress = '192.168.1.50';
+            
+            await adapter.onReady();
+            
+            expect(adapter.log.info.calledWithMatch(/192.168.1.50/)).to.be.true;
+        });
+
+        it('does not start polling when no IP and autoDiscovery disabled', async () => {
+            const adapter3 = Adapter({
+                config: {
+                    autoDiscovery: false,
+                    ipAddress: '',
+                    udpPort: 30000,
+                    pollInterval: 10000
+                }
+            });
+            adapter3.pendingRequests.clear();
+            adapter3._pollingInProgress = false;
+            adapter3.socket = mockSocket;
+
+            await adapter3.onReady();
+            expect(adapter3.pollInterval).to.be.null;
+            expect(adapter3.slowPollInterval).to.be.null;
+        });
+
+        it('starts slow polling when IP is configured', async () => {
+            adapter.startPolling();
+            expect(adapter.slowPollInterval).to.not.be.null;
+        });
+
+        it('pollSlow calls all slow poll functions', async () => {
+            adapter.pollInfoStatus = sandbox.stub().resolves();
+            adapter.pollWifiStatus = sandbox.stub().resolves();
+            adapter.pollBLEStatus = sandbox.stub().resolves();
+
+            await adapter.pollSlow();
+            expect(adapter.pollInfoStatus.called).to.be.true;
+            expect(adapter.pollWifiStatus.called).to.be.true;
+            expect(adapter.pollBLEStatus.called).to.be.true;
         });
     });
 
     describe('onStateChange', () => {
-        it('should not process acknowledged states', async () => {
-            adapter.sendRequest = async () => ({});
+        beforeEach(async () => {
+            await adapter.onReady();
+            adapter.sendRequest = sandbox.stub().resolves();
+        });
+
+        it('does nothing for acknowledged states', async () => {
             await adapter.onStateChange('control.mode', { val: 'Auto', ack: true });
-            expect(adapter.sendRequest.callCount).to.be.equal(0);
+            expect(adapter.sendRequest.called).to.be.false;
         });
 
-        it('should send ES.SetMode for mode change to Auto', async () => {
-            adapter.sendRequest = async () => ({});
-            await adapter.onStateChange('control.mode', { val: 'Auto', ack: false });
-            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
-                id: 0,
-                config: {
-                    mode: 'Auto',
-                    auto_cfg: { enable: 1 }
-                }
-            }))).to.be.true;
+        it('does nothing for unknown state changes', async () => {
+            await adapter.onStateChange('power.pv', { val: 100, ack: false });
+            expect(adapter.sendRequest.called).to.be.false;
         });
 
-        it('should send ES.SetMode for mode change to AI', async () => {
-            adapter.sendRequest = async () => ({});
-            await adapter.onStateChange('control.mode', { val: 'AI', ack: false });
-            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
-                id: 0,
-                config: {
-                    mode: 'AI',
-                    ai_cfg: { enable: 1 }
-                }
-            }))).to.be.true;
+        it('handles onStateChange errors gracefully', async () => {
+            adapter.getStateAsync.rejects(new Error('State error'));
+
+            try {
+                await adapter.onStateChange('control.mode', { val: 'Auto', ack: false });
+            } catch (e) {
+                // Expected to throw
+            }
+            expect(adapter.log.error.calledWithMatch(/Failed to set/)).to.be.true;
         });
 
-        it('should send ES.SetMode with passive config', async () => {
-            adapter.sendRequest = async () => ({});
-            adapter.getStateAsync = async (id) => {
-                if (id === 'control.passivePower') return { val: 100 };
-                if (id === 'control.passiveDuration') return { val: 300 };
-                return null;
-            };
-            await adapter.onStateChange('control.mode', { val: 'Passive', ack: false });
-            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
-                id: 0,
-                config: {
-                    mode: 'Passive',
-                    passive_cfg: {
-                        power: 100,
-                        cd_time: 300
-                    }
-                }
-            }))).to.be.true;
+        it('updates passive control values when not in Manual mode', async () => {
+            adapter.getStateAsync = sandbox.stub();
+            adapter.getStateAsync.withArgs('control.mode').resolves({ val: 'Passive' });
+            adapter.getStateAsync.withArgs('control.passivePower').resolves({ val: 500 });
+            adapter.getStateAsync.withArgs('control.passiveDuration').resolves({ val: 600 });
+
+            await adapter.onStateChange('control.passivePower', { val: 300, ack: false });
+
+            expect(adapter.log.error.called).to.be.false;
         });
 
-        it('should send ES.SetMode with manual config', async () => {
-            adapter.sendRequest = async () => ({});
-            adapter.getStateAsync = async (id) => {
-                const states = {
-                    'control.manualTimeNum': { val: 1 },
-                    'control.manualStartTime': { val: '08:30' },
-                    'control.manualEndTime': { val: '20:30' },
-                    'control.manualWeekdays': { val: 127 },
-                    'control.manualPower': { val: 500 },
-                    'control.manualEnable': { val: true }
-                };
-                return states[id] || null;
-            };
-            await adapter.onStateChange('control.mode', { val: 'Manual', ack: false });
-            expect(adapter.sendRequest.calledWith('ES.SetMode', sinon.match({
-                id: 0,
-                config: {
-                    mode: 'Manual',
-                    manual_cfg: {
-                        time_num: 1,
-                        start_time: '08:30',
-                        end_time: '20:30',
-                        week_set: 127,
-                        power: 500,
-                        enable: 1
-                    }
-                }
-            }))).to.be.true;
+        it('handles null mode state', async () => {
+            adapter.getStateAsync = sandbox.stub();
+            adapter.getStateAsync.withArgs('control.mode').resolves(null);
+
+            await adapter.onStateChange('control.passivePower', { val: 300, ack: false });
+
+            expect(adapter.sendRequest.called).to.be.false;
         });
     });
 
-    describe('poll', () => {
-        it('should set connection to true on success', async () => {
-            adapter.pollESStatus = async () => {};
-            adapter.pollBatteryStatus = async () => {};
-            adapter.pollPVStatus = async () => {};
-            adapter.pollWifiStatus = async () => {};
-            adapter.pollBLEStatus = async () => {};
-            adapter.pollEMStatus = async () => {};
-            adapter.pollModeStatus = async () => {};
+    describe('onUnload', () => {
+        it('handles errors during cleanup', (done) => {
+            adapter.socket = null;
+            adapter.pollInterval = null;
+            adapter.slowPollInterval = null;
+            adapter.pendingRequests.clear();
 
-            await adapter.poll();
-
-            expect(adapter.setStateAsync.calledWith('info.connection', { val: true, ack: true })).to.be.true;
+            adapter.onUnload(() => {
+                done();
+            });
         });
 
-        it('should set connection to false on error', async () => {
-            adapter.pollESStatus = async () => { throw new Error('Connection error'); };
-            adapter.pollBatteryStatus = async () => {};
-            adapter.pollPVStatus = async () => {};
-            adapter.pollWifiStatus = async () => {};
-            adapter.pollBLEStatus = async () => {};
-            adapter.pollEMStatus = async () => {};
-            adapter.pollModeStatus = async () => {};
+        it('handles exception during cleanup', (done) => {
+            adapter.socket = null;
+            adapter.pollInterval = null;
+            adapter.slowPollInterval = null;
+            adapter.pendingRequests = null;
 
-            await adapter.poll();
-
-            expect(adapter.setStateAsync.calledWith('info.connection', { val: false, ack: true })).to.be.true;
-        });
-    });
-
-    describe('startPolling', () => {
-        it('should set pollInterval', () => {
-            const clock = sinon.useFakeTimers();
-            
-            adapter.startPolling();
-
-            expect(adapter.pollInterval).to.not.be.null;
-
-            clock.restore();
+            adapter.onUnload(() => {
+                done();
+            });
         });
     });
 });

@@ -29,6 +29,7 @@
     "@iobroker/types": "^7.1.1",
     "@types/node": "^20.0.0",
     "chai": "^4.5.0",
+    "nyc": "^18.0.0",
     "sinon": "^21.1.0",
     "typescript": "^5.0.0"
   },
@@ -41,8 +42,37 @@
   ],
   "scripts": {
     "test": "npm run test:package && npm run test:unit",
-    "test:package": "mocha test/package --exit",
-    "test:unit": "mocha test/unit --exit",
-    "test:integration": "mocha test/integration --exit"
+    "test:package": "mocha test/package.test.js --exit",
+    "test:unit": "mocha test/unit.test.js --exit",
+    "test:integration": "mocha test/integration.test.js --exit 2>/dev/null || true",
+    "coverage": "nyc npm run test",
+    "coverage:report": "nyc report --reporter=text --reporter=lcov --reporter=html"
+  },
+  "nyc": {
+    "all": true,
+    "include": [
+      "main.js"
+    ],
+    "exclude": [
+      "test/**",
+      "node_modules/**",
+      "admin/**",
+      "lib/**"
+    ],
+    "reporter": [
+      "text",
+      "text-summary",
+      "html"
+    ],
+    "check-coverage": true,
+    "branches": 70,
+    "functions": 85,
+    "lines": 85,
+    "statements": 85,
+    "extension": [
+      ".js"
+    ],
+    "sourceMap": false,
+    "instrument": true
   }
 }

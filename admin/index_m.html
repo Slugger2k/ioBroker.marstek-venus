@@ -37,7 +37,7 @@
     </div>
     <div class="form-group">
         <label for="pollInterval">Poll interval (ms)</label>
-        <input type="number" id="pollInterval" value="1000" min="500" max="60000">
+        <input type="number" id="pollInterval" value="10000" min="500" max="60000">
     </div>
     <button onclick="discover()">🔍 Discover Devices</button>
     <button onclick="saveSettings()">💾 Save Settings</button>
@@ -47,7 +47,7 @@
             document.getElementById('autoDiscovery').checked = saved.autoDiscovery ?? true;
             document.getElementById('ipAddress').value = saved.ipAddress || '';
             document.getElementById('udpPort').value = saved.udpPort || '30000';
-            document.getElementById('pollInterval').value = saved.pollInterval || '1000';
+            document.getElementById('pollInterval').value = saved.pollInterval || '10000';
         }
         function showMessage(msg, type) {
             const el = document.getElementById('status');

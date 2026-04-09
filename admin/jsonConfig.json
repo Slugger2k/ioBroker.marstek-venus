@@ -23,7 +23,7 @@
       "label": "Poll interval (ms)",
       "min": 500,
       "max": 60000,
-      "default": 1000,
+      "default": 10000,
       "help": "pollInterval_help"
     },
     {

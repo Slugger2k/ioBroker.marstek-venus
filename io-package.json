@@ -7,11 +7,21 @@
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher"
     },
-    "desc": "Adapter for Marstek Venus C/D/E energy storage devices",
+    "desc": {
+      "en": "Adapter for Marstek Venus C/D/E energy storage devices"
+    },
     "descLang": {
       "en": "Integrates Marstek Venus battery inverters with ioBroker using official local Open API",
       "de": "Integriert Marstek Venus Batteriewechselrichter mit ioBroker über die offizielle lokale Open API"
     },
+    "news": {
+      "0.1.0": {
+        "en": "Initial release"
+      }
+    },
+    "icon": "marstek-venus.png",
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.marstek-venus/master/admin/marstek-venus.png",
+    "type": "energy",
     "authors": [
       "ioBroker Community"
     ],
@@ -47,7 +57,7 @@
   "native": {
     "ipAddress": "",
     "udpPort": 30000,
-    "pollInterval": 1000,
+    "pollInterval": 10000,
     "autoDiscovery": true
   },
   "instanceObjects": [
