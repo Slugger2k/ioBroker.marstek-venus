@@ -854,4 +854,65 @@ describe('MarstekVenusAdapter', function() {
             });
         });
     });
+
+    describe('discoverDevices()', () => {
+        beforeEach(async () => {
+            await adapter.onReady();
+            adapter.socket = { send: sandbox.stub().yields(null) };
+            sandbox.stub(global, 'setTimeout').callsFake((fn) => { fn(); return 1; });
+        });
+
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        it('sends all 3 discovery attempts to broadcast and multicast', async () => {
+            await adapter.discoverDevices();
+            expect(adapter.socket.send.callCount).to.equal(6);
+        });
+
+        it('handles broadcast send errors gracefully', async () => {
+            adapter.socket.send.onFirstCall().yields(new Error('Broadcast failed'));
+            await adapter.discoverDevices();
+            expect(adapter.log.error.calledOnce).to.be.true;
+        });
+
+        it('handles multicast send errors as debug only', async () => {
+            adapter.socket.send.onSecondCall().yields(new Error('Multicast failed'));
+            await adapter.discoverDevices();
+            expect(adapter.log.debug.called).to.be.true;
+            expect(adapter.log.error.called).to.be.false;
+        });
+
+        it('catches exceptions during discovery attempts', async () => {
+            adapter.socket.send.throws(new Error('Send exception'));
+            await adapter.discoverDevices();
+            expect(adapter.log.error.called).to.be.true;
+        });
+    });
+
+    describe('setControlTarget', () => {
+        beforeEach(async () => {
+            await adapter.onReady();
+            adapter.sendRequest = sandbox.stub().resolves();
+        });
+
+        it('handles valid control values', async () => {
+            await adapter.setControlTarget(150);
+            expect(adapter.sendRequest.calledWith('Marstek.SetTargetPower', { power: 150 })).to.be.true;
+        });
+
+        it('clamps values within min/max range', async () => {
+            await adapter.setControlTarget(-2000);
+            expect(adapter.sendRequest.lastCall.args[1].power).to.equal(-1500);
+            
+            await adapter.setControlTarget(2000);
+            expect(adapter.sendRequest.lastCall.args[1].power).to.equal(1500);
+        });
+
+        it('ignores null and undefined values', async () => {
+            await adapter.setControlTarget(null);
+            expect(adapter.sendRequest.called).to.be.false;
+        });
+    });
 });
