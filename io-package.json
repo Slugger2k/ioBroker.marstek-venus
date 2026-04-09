@@ -39,6 +39,7 @@
     ],
     "logLevel": "info",
     "translated": false,
+    "adminUI": {"config": "materialize"},
     "supportedMessages": [
       "sendTo"
     ]

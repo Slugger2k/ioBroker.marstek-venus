@@ -21,7 +21,8 @@
     "url": "https://github.com/ioBroker/ioBroker.marstek-venus.git"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.0.0"
+    "@iobroker/adapter-core": "^3.0.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@iobroker/testing": "^4.0.0",
