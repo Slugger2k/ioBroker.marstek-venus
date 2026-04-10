@@ -15,7 +15,7 @@
         #status.error { background: #ffcdd2; color: #c62828; border: 1px solid #e57373; }
     </style>
 </head>
-<body>
+<body onload="load()">
     <h2>Marstek Venus Adapter Configuration</h2>
     <div id="status"></div>
     <div class="note">
@@ -43,7 +43,7 @@
     <button onclick="saveSettings()">💾 Save Settings</button>
     <script>
         function load() {
-            window.parent.postMessage({ command: 'sendTo', instance: 'marstek-venus.0', data: { command: 'getSettings' } }, '*');
+            window.parent.postMessage({ command: 'getSettings', instance: 'marstek-venus.0' }, '*');
         }
         function showMessage(msg, type) {
             const el = document.getElementById('status');
@@ -53,7 +53,7 @@
             setTimeout(() => { el.style.display = 'none'; }, 3000);
         }
         function discover() {
-            window.parent.postMessage({ command: 'sendTo', instance: 'marstek-venus.0', data: { command: 'discover' } }, '*');
+            window.parent.postMessage({ command: 'discover', instance: 'marstek-venus.0' }, '*');
             showMessage('Discovery broadcast sent. Check adapter log.', 'success');
         }
         function saveSettings() {
@@ -63,7 +63,7 @@
                 udpPort: parseInt(document.getElementById('udpPort').value) || 30000,
                 pollInterval: parseInt(document.getElementById('pollInterval').value) || 1000
             };
-            window.parent.postMessage({ command: 'sendTo', instance: 'marstek-venus.0', data: { command: 'setSettings', values: settings } }, '*');
+            window.parent.postMessage({ command: 'setSettings', instance: 'marstek-venus.0', values: settings }, '*');
             localStorage.setItem('marstekVenusSettings', JSON.stringify(settings));
             showMessage('Settings saved.', 'success');
         }

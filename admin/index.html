@@ -12,7 +12,7 @@
         .note { background: #e3f2fd; padding: 12px; border-radius: 4px; margin: 15px 0; font-size: 0.9em; }
     </style>
 </head>
-<body>
+<body onload="load()">
     <h2>Marstek Venus Adapter Configuration</h2>
     
     <div class="note">
@@ -48,12 +48,11 @@
     <script>
         function load() {
             window.parent.postMessage({
-                command: 'sendTo',
-                instance: 'marstek-venus.0',
-                data: { command: 'getSettings' }
+                command: 'getSettings',
+                instance: 'marstek-venus.0'
             }, '*');
         }
-        
+
         let discoveryTimeout = null;
 
         function discover() {
@@ -61,16 +60,14 @@
             status.textContent = 'Discovering devices...';
             status.style.color = 'orange';
             window.parent.postMessage({
-                command: 'sendTo',
-                instance: 'marstek-venus.0',
-                data: { command: 'discover' }
+                command: 'discover',
+                instance: 'marstek-venus.0'
             }, '*');
-            
-            // Clear any existing timeout first
+
             if (discoveryTimeout) {
                 clearTimeout(discoveryTimeout);
             }
-            
+
             discoveryTimeout = setTimeout(() => {
                 if (status.textContent === 'Discovering devices...') {
                     status.textContent = 'No response from adapter. Check logs.';
@@ -78,7 +75,7 @@
                 }
             }, 5000);
         }
-        
+
         function save() {
             return {
                 autoDiscovery: document.getElementById('autoDiscovery').checked,
@@ -87,13 +84,13 @@
                 pollInterval: parseInt(document.getElementById('pollInterval').value) || 1000
             };
         }
-        
+
         function saveSettings() {
             const settings = save();
             window.parent.postMessage({
-                command: 'sendTo',
+                command: 'setSettings',
                 instance: 'marstek-venus.0',
-                data: { command: 'setSettings', values: settings }
+                values: settings
             }, '*');
             localStorage.setItem('marstekVenusSettings', JSON.stringify(settings));
             const status = document.getElementById('uiStatus');
