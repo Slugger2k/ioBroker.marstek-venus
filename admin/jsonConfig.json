@@ -40,21 +40,6 @@
       "label": "Auto discover devices on network",
       "default": true,
       "sm": 6
-    },
-    "_discoverBtn": {
-      "type": "sendTo",
-      "command": "discover",
-      "result": {
-        "success": {"en": "Device discovered successfully"},
-        "noDevice": {"en": "No device found"},
-        "error": {"en": "Discovery failed"}
-      },
-      "error": {
-        "timeout": {"en": "Discovery timeout"}
-      },
-      "label": "Discover Devices",
-      "icon": "search",
-      "newLine": true
     }
   }
 }
