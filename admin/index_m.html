@@ -43,11 +43,7 @@
     <button onclick="saveSettings()">💾 Save Settings</button>
     <script>
         function load() {
-            const saved = JSON.parse(localStorage.getItem('marstekVenusSettings') || '{}');
-            document.getElementById('autoDiscovery').checked = saved.autoDiscovery ?? true;
-            document.getElementById('ipAddress').value = saved.ipAddress || '';
-            document.getElementById('udpPort').value = saved.udpPort || '30000';
-            document.getElementById('pollInterval').value = saved.pollInterval || '10000';
+            window.parent.postMessage({ command: 'sendTo', instance: 'marstek-venus.0', data: { command: 'getSettings' } }, '*');
         }
         function showMessage(msg, type) {
             const el = document.getElementById('status');
@@ -73,6 +69,25 @@
         }
         window.addEventListener('message', (event) => {
             const msg = event.data;
+
+            if (msg && msg.command === 'sendTo' && msg.data && msg.data.command === 'getSettings') {
+                const saved = msg.data.values || {};
+                document.getElementById('autoDiscovery').checked = saved.autoDiscovery ?? true;
+                document.getElementById('ipAddress').value = saved.ipAddress || '';
+                document.getElementById('udpPort').value = saved.udpPort || '30000';
+                document.getElementById('pollInterval').value = saved.pollInterval || '10000';
+                return;
+            }
+
+            if (msg && msg.command === 'sendTo' && msg.data && msg.data.command === 'setSettings') {
+                if (msg.data.success) {
+                    showMessage('Settings saved to adapter.', 'success');
+                } else {
+                    showMessage('Failed to save settings.', 'error');
+                }
+                return;
+            }
+
             if (msg && msg.command === 'sendTo' && msg.data) {
                 console.log('Response from adapter:', msg.data);
                 

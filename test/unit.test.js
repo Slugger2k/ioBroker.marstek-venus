@@ -34,6 +34,7 @@ class MockAdapterBase {
         };
         this.setStateAsync = sinon.stub().resolves();
         this.setStateChangedAsync = sinon.stub().resolves();
+        this.setObject = sinon.stub().resolves();
         this.setObjectNotExistsAsync = sinon.stub().resolves();
         this.getStateAsync = sinon.stub().resolves();
         this.subscribeStatesAsync = sinon.stub().resolves();
@@ -231,7 +232,7 @@ describe('MarstekVenusAdapter', function() {
                 expect(adapter.config.ipAddress).to.equal('192.168.1.100');
                 expect(adapter.config.udpPort).to.equal(30001);
                 expect(adapter.config.pollInterval).to.equal(5000);
-                expect(adapter.log.info.calledWith('Settings updated via UI')).to.be.true;
+                expect(adapter.log.info.calledWith('Settings saved and persisted')).to.be.true;
             });
         });
     });

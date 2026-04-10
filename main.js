@@ -212,7 +212,33 @@ class MarstekVenusAdapter extends utils.Adapter {
             this.config.ipAddress = settings.ipAddress;
             this.config.udpPort = settings.udpPort;
             this.config.pollInterval = settings.pollInterval;
-            this.log.info("Settings updated via UI");
+
+            await this.setObject('system.adapter.marstek-venus.0', {
+                type: 'instance',
+                native: {
+                    autoDiscovery: settings.autoDiscovery,
+                    ipAddress: settings.ipAddress,
+                    udpPort: settings.udpPort,
+                    pollInterval: settings.pollInterval
+                }
+            });
+
+            this.log.info('Settings saved and persisted');
+
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
+            }
+        } else if (obj.command === 'getSettings') {
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, {
+                    values: {
+                        autoDiscovery: this.config.autoDiscovery,
+                        ipAddress: this.config.ipAddress,
+                        udpPort: this.config.udpPort,
+                        pollInterval: this.config.pollInterval
+                    }
+                }, obj.callback);
+            }
         }
     }
 

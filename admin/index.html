@@ -47,11 +47,11 @@
     
     <script>
         function load() {
-            const saved = JSON.parse(localStorage.getItem('marstekVenusSettings') || '{}');
-            document.getElementById('autoDiscovery').checked = saved.autoDiscovery ?? true;
-            document.getElementById('ipAddress').value = saved.ipAddress || '';
-            document.getElementById('udpPort').value = saved.udpPort || '30000';
-            document.getElementById('pollInterval').value = saved.pollInterval || '10000';
+            window.parent.postMessage({
+                command: 'sendTo',
+                instance: 'marstek-venus.0',
+                data: { command: 'getSettings' }
+            }, '*');
         }
         
         let discoveryTimeout = null;
@@ -105,7 +105,30 @@
         window.addEventListener('message', (event) => {
             const msg = event.data;
             const status = document.getElementById('uiStatus');
-            
+
+            if (msg && msg.command === 'sendTo' && msg.data && (msg.data.command === 'getSettings' || msg.data.command === 'returnStatus')) {
+                const data = msg.data;
+                const saved = (data.command === 'getSettings' ? data.values : data) || {};
+                document.getElementById('autoDiscovery').checked = saved.autoDiscovery ?? true;
+                document.getElementById('ipAddress').value = saved.ipAddress || '';
+                document.getElementById('udpPort').value = saved.udpPort || '30000';
+                document.getElementById('pollInterval').value = saved.pollInterval || '10000';
+                return;
+            }
+
+            if (msg && msg.command === 'sendTo' && msg.data && msg.data.command === 'setSettings') {
+                const status = document.getElementById('uiStatus');
+                if (msg.data.success) {
+                    status.textContent = 'Settings saved to adapter.';
+                    status.style.color = 'green';
+                } else {
+                    status.textContent = 'Failed to save settings.';
+                    status.style.color = 'red';
+                }
+                setTimeout(() => status.textContent = '', 3000);
+                return;
+            }
+
             if (msg && msg.command === 'returnStatus') {
                 // Clear timeout when any response is received
                 if (discoveryTimeout) {
