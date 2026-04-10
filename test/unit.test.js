@@ -1036,6 +1036,10 @@ describe('MarstekVenusAdapter', function() {
         it('sends all 3 discovery attempts to broadcast and multicast', async () => {
             await adapter.discoverDevices();
             expect(adapter.socket.send.callCount).to.equal(6);
+            // Verify broadcast (255.255.255.255) and multicast (239.255.255.250) are called for each attempt
+            const calls = adapter.socket.send.getCalls();
+            // Each attempt: broadcast + multicast = 2 calls, 3 attempts = 6 total
+            expect(calls.length).to.equal(6);
         });
 
         it('handles broadcast send errors gracefully', async () => {

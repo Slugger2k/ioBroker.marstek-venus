@@ -107,16 +107,6 @@ class MarstekVenusAdapter extends utils.Adapter {
                         this.pendingRequestsByMethod.delete(method);
                         this.log.error(`sendRequest ${method} to ${targetIP} send error: ${err.message}`);
                         reject(err);
-                    } else {
-                        setTimeout(() => {
-                            if (this.pendingRequests.has(id)) {
-                                this.socket.send(message, 0, message.length, this.config.udpPort, '255.255.255.255', (broadcastErr) => {
-                                    if (broadcastErr) {
-                                        this.log.debug(`Broadcast retry for ${method} failed: ${broadcastErr.message}`);
-                                    }
-                                });
-                            }
-                        }, 1000);
                     }
                 });
             };
