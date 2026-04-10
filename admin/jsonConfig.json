@@ -1,64 +1,60 @@
 {
   "type": "panel",
-  "items": [
-    {
+  "items": {
+    "_header": {
+      "type": "header",
+      "text": "Marstek Venus Configuration",
+      "size": 2
+    },
+    "_info": {
+      "type": "staticText",
+      "label": "Pre-requirements: Enable Open API in the official Marstek mobile app first, note the configured UDP port (default: 30000), and ensure device and ioBroker are on the same local network.",
+      "newLine": true
+    },
+    "ipAddress": {
       "type": "text",
-      "name": "ipAddress",
       "label": "Device IP Address",
       "placeholder": "192.168.1.xxx",
-      "help": "ipAddress_help"
+      "sm": 6,
+      "newLine": true
     },
-    {
+    "udpPort": {
       "type": "number",
-      "name": "udpPort",
       "label": "UDP Port",
       "min": 1,
       "max": 65535,
       "default": 30000,
-      "help": "udpPort_help"
+      "sm": 6
     },
-    {
+    "pollInterval": {
       "type": "number",
-      "name": "pollInterval",
       "label": "Poll interval (ms)",
       "min": 500,
       "max": 60000,
       "default": 10000,
-      "help": "pollInterval_help"
+      "sm": 6,
+      "newLine": true
     },
-    {
-      "type": "number",
-      "name": "fastPollInterval",
-      "label": "Fast poll interval (ms) - power values",
-      "min": 500,
-      "max": 10000,
-      "default": 1000,
-      "help": "fastPollInterval_help"
-    },
-    {
-      "type": "number",
-      "name": "requestTimeout",
-      "label": "Request timeout (ms)",
-      "min": 2000,
-      "max": 60000,
-      "default": 5000,
-      "help": "requestTimeout_help"
-    },
-    {
-      "type": "number",
-      "name": "maxRetries",
-      "label": "Max retries per request",
-      "min": 0,
-      "max": 5,
-      "default": 1,
-      "help": "maxRetries_help"
-    },
-    {
+    "autoDiscovery": {
       "type": "checkbox",
-      "name": "autoDiscovery",
-      "label": "Auto discover devices",
+      "label": "Auto discover devices on network",
       "default": true,
-      "help": "autoDiscovery_help"
+      "sm": 6
+    },
+    "_discoverBtn": {
+      "type": "sendTo",
+      "command": "discover",
+      "result": {
+        "success": {"en": "Device discovered successfully"},
+        "noDevice": {"en": "No device found"},
+        "error": {"en": "Discovery failed"}
+      },
+      "error": {
+        "timeout": {"en": "Discovery timeout"}
+      },
+      "label": "Discover Devices",
+      "icon": "search",
+      "newLine": true
     }
-  ]
+  }
 }
