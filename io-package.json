@@ -49,7 +49,7 @@
     ],
     "logLevel": "info",
     "translated": false,
-    "adminUI": {"config": "materialize"},
+    "adminUI": {"config": "json"},
     "supportedMessages": [
       "sendTo"
     ]
