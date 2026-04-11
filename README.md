@@ -10,7 +10,7 @@ The ioBroker.marstek-venus adapter provides full integration with Marstek Venus 
   - **Normal poll** (default 10s): All status values
   - **Slow poll** (10min): Device info and network status
 - ✅ **Request deduplication** - prevents overlapping requests
-- ✅ **Automatic retry** - 3 retries with 20s timeout per request
+- ✅ **Automatic retry** - 1 retry with 2000ms timeout per request
 - ✅ **Complete state coverage** (battery, power, energy, network, device info)
 - ✅ **Full control support** (Auto/AI/Manual/Passive modes)
 - ✅ **Manual mode configuration** (time slots, weekdays, power, enable/disable)
@@ -26,7 +26,7 @@ The ioBroker.marstek-venus adapter provides full integration with Marstek Venus 
 3. **Configure instance**:
    - Auto discovery (recommended) or manual IP entry
    - Set UDP port as configured in app
-   - Adjust poll interval (default 1000ms)
+   - Adjust poll interval and fastPollInterval (default 1000ms)
 4. **Save and start** adapter
 
 ## Configuration Options
@@ -37,7 +37,7 @@ The ioBroker.marstek-venus adapter provides full integration with Marstek Venus 
 | **udpPort** | UDP port for communication | 30000 |
 | **pollInterval** | Normal poll interval for all status values (ms) | 10000 |
 | **fastPollInterval** | Fast poll interval for power values (ms) | 1000 |
-| **requestTimeout** | Request timeout before retry (ms) | 5000 |
+| **requestTimeout** | Request timeout before retry (ms) | 2000 |
 | **maxRetries** | Max retry attempts per request | 1 |
 | **autoDiscovery** | Enable automatic device discovery | true |
 
@@ -147,7 +147,7 @@ The adapter implements 100% of the official Marstek Open API Revision 1.0:
 ### Polling Issues
 - Adjust `fastPollInterval` for power value update frequency (default 1000ms)
 - Adjust `pollInterval` for normal status update frequency (default 10000ms)
-- Adjust `requestTimeout` if device needs more time to respond (default 5000ms)
+- Adjust `requestTimeout` if device needs more time to respond (default 2000ms)
 - Increase `maxRetries` for unreliable network connections
 - Slow poll runs every 10 minutes for device info and network status
 
@@ -161,7 +161,7 @@ The adapter implements 100% of the official Marstek Open API Revision 1.0:
 ### 0.1.1
 - Added 3-tier polling system (fast/normal/slow)
 - Added request deduplication to prevent overlapping requests
-- Added automatic retry (3 attempts with 20s timeout per request)
+- Added automatic retry (1 attempt with 2000ms timeout per request)
 - Optimized power value updates with dedicated fast poll
 
 ### 0.1.0
