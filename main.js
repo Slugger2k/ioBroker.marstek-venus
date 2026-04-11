@@ -75,10 +75,36 @@ class MarstekVenusAdapter extends utils.Adapter {
 
         this.pendingRequestsByMethod = this.pendingRequestsByMethod || new Map();
 
-        if (this.pendingRequestsByMethod.has(method)) {
-            this.log.debug(`Request ${method} already pending, reusing existing promise`);
-            return this.pendingRequestsByMethod.get(method);
+        const PLACEHOLDER = Symbol('pending');
+
+        const existing = this.pendingRequestsByMethod.get(method);
+        if (existing === PLACEHOLDER) {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const checkInterval = setInterval(() => {
+                    const updated = this.pendingRequestsByMethod.get(method);
+                    if (updated && updated !== PLACEHOLDER) {
+                        clearInterval(checkInterval);
+                        resolve(updated);
+                    } else if (!this.pendingRequestsByMethod.has(method)) {
+                        clearInterval(checkInterval);
+                        reject(new Error(`Request ${method} failed before completion`));
+                    }
+                    attempts++;
+                    if (attempts > 500) {
+                        clearInterval(checkInterval);
+                        reject(new Error(`Request ${method} wait timeout`));
+                    }
+                }, 20);
+            });
         }
+
+        if (existing) {
+            this.log.debug(`Request ${method} already pending, reusing existing promise`);
+            return existing;
+        }
+
+        this.pendingRequestsByMethod.set(method, PLACEHOLDER);
 
         const maxRetries = this.config.maxRetries || 1;
         const timeoutMs = this.config.requestTimeout || 2000;
