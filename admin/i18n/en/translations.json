@@ -1,0 +1,11 @@
+{
+    "header": "Marstek Venus Configuration",
+    "info": "Pre-requirements: Enable Open API in the official Marstek mobile app first, note the configured UDP port (default: 30000), and ensure device and ioBroker are on the same local network.",
+    "ipAddress": "IP Address",
+    "udpPort": "UDP Port",
+    "pollInterval": "Poll Interval",
+    "fastPollInterval": "Fast Poll Interval",
+    "requestTimeout": "Request Timeout",
+    "maxRetries": "Max Retries",
+    "autoDiscovery": "Auto Discovery"
+}

@@ -3,12 +3,12 @@
   "items": {
     "_header": {
       "type": "header",
-      "text": "Marstek Venus Configuration",
+      "text": "$t:header",
       "size": 2
     },
     "_info": {
       "type": "staticText",
-      "label": "Pre-requirements: Enable Open API in the official Marstek mobile app first, note the configured UDP port (default: 30000), and ensure device and ioBroker are on the same local network.",
+      "label": "$t:info",
       "newLine": true,
       "xs": 12,
       "sm": 12,
