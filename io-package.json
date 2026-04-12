@@ -79,6 +79,7 @@
       "license": "MIT",
       "type": "free"
     },
+    "enabled": false,
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "compact": true,
