@@ -187,15 +187,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- fix adapter checker issues
+
 ### 0.1.9 (2026-04-12)
 - fix adapter checker issues
-
-### 0.1.8 (2026-04-12)
-- fix adapter checker issues
-
-### 0.1.7 (2026-04-12)
-- fix adapter checker issues
-- add npm deploy
 
 ### 0.1.6 (2026-04-12)
 - Removed invalid ES.GetInfo call which was causing Method not found errors
