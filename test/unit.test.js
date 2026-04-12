@@ -328,6 +328,7 @@ describe("MarstekVenusAdapter", function () {
 			adapter._requestQueue._shuttingDown = false;
 			adapter._requestQueue.queue = [];
 			adapter._requestQueue._busy = false;
+			adapter.config.maxRetries = 1;
 			const promise = adapter.sendRequest("ES.GetStatus");
 			clock.tick(1);
 			clock.tick(10000);

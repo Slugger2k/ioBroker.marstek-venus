@@ -152,6 +152,7 @@ Follow existing code style conventions documented below.
 5. Do not change code style of existing working code
 6. Preserve all existing functionality unless you are fixing a bug
 7. Always test your changes before declaring the task complete
+8. Always adding changelog to README.md file section ## Changelog\n### **WORK IN PROGRESS**
 
 ### When asked to implement something:
 1. First check how similar functionality is implemented elsewhere

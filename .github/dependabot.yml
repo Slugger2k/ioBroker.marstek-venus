@@ -19,7 +19,9 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'monthly'
+      interval: monthly
       time: '04:00'
-      timezone: 'Europe/Berlin'
-    open-pull-requests-limit: 5
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 15
+    cooldown:
+      default-days: 7

@@ -121,8 +121,8 @@ class MarstekVenusAdapter extends utils.Adapter {
 
 		this._pendingRequestsByMethod.set(method, PLACEHOLDER);
 
-		const maxRetries = this.config.maxRetries || 1;
-		const timeoutMs = this.config.requestTimeout || 2000;
+		const maxRetries = this.config.maxRetries || 3;
+		const timeoutMs = this.config.requestTimeout || 3000;
 		const id = this._requestId++;
 		const request = { id, method, params };
 		const message = Buffer.from(JSON.stringify(request));
@@ -146,8 +146,8 @@ class MarstekVenusAdapter extends utils.Adapter {
 							} else {
 								this._pendingRequests.delete(id);
 								this._pendingRequestsByMethod.delete(method);
-								this.log.warn(`sendRequest ${method} failed after ${maxRetries} attempts`);
-								reject(new Error(`Request ${method} timed out after ${maxRetries} attempts`));
+								this.log.warn(`sendRequest ${method} failed after ${retryCount} attempts`);
+								reject(new Error(`Request ${method} timed out after ${retryCount} attempts`));
 							}
 						}, timeoutMs);
 
@@ -239,12 +239,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startFastPolling() {
-		this.log.info(`Starting fast polling loop (every ${this.config.fastPollInterval || 1000}ms)`);
+		this.log.info(`Starting fast polling loop (every ${this.config.fastPollInterval || 5000}ms)`);
 		if (this._fastPollTimer) {
 			this.clearInterval(this._fastPollTimer);
 			this._fastPollTimer = null;
 		}
-		this._fastPollTimer = this.setInterval(() => this.pollPower(), this.config.fastPollInterval || 1000);
+		this._fastPollTimer = this.setInterval(() => this.pollPower(), this.config.fastPollInterval || 5000);
 		this.pollPower();
 	}
 
@@ -252,12 +252,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startPolling() {
-		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 10000}ms)`);
+		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 20000}ms)`);
 		if (this._normalPollTimer) {
 			this.clearInterval(this._normalPollTimer);
 			this._normalPollTimer = null;
 		}
-		this._normalPollTimer = this.setInterval(() => this.poll(), this.config.pollInterval || 10000);
+		this._normalPollTimer = this.setInterval(() => this.poll(), this.config.pollInterval || 20000);
 		this.startFastPolling();
 		this.startSlowPolling();
 		this.poll();

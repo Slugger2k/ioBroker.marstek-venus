@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.10",
+    "version": "0.1.12",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
@@ -29,6 +29,32 @@
       "zh-cn": "Marstek Venus C/D/E 储能设备适配器"
     },
     "news": {
+      "0.1.12": {
+        "en": "new release",
+        "de": "neue veröffentlichung",
+        "ru": "новый выпуск",
+        "pt": "nova versão",
+        "nl": "nieuwe release",
+        "fr": "nouvelle version",
+        "it": "nuova release",
+        "es": "nueva versión",
+        "pl": "nowe wydanie",
+        "uk": "новий реліз",
+        "zh-cn": "新发行"
+      },
+      "0.1.11": {
+        "en": "- Fixed incorrect retry counter in error messages: now correctly shows actual number of attempts instead of configured maxRetries\n- Updated default configuration values\n  - maxRetries: 3\n  - requestTimeout: 3000ms\n  - pollInterval: 20000ms\n  - fastPollInterval: 5000ms\n- Added 7 day cooldown to dependabot configuration\n- Split changelog into README.md (current) and CHANGELOG_OLD.md (historical entries)\n- Updated all documentation with new default values\n\n> Older changelog entries are available in [CHANGELOG_OLD.md](./CHANGELOG_OLD.md)",
+        "de": "- Behobene fehlerhafte Retry-Zähler in Fehlermeldungen: jetzt korrekt zeigt die tatsächliche Anzahl der Versuche statt konfiguriert maxRetries\n- Aktualisierte Standardkonfigurationswerte\n- maxRetries: 3\n- AnfrageTimeout: 3000ms\n- UmfrageInterval: 20000m\n- FastPollInterval: 5000m\n- Hinzugefügt 7-Tage-Abklingzeit zur abhängigabot-Konfiguration\n- Teilen Sie Changelog in README.md (current) und CHANGELOG OLD.md (historische Einträge)\n- Aktualisiert alle Dokumentationen mit neuen Standardwerten\n\n> ältere Changelog-Einträge sind verfügbar in [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "ru": "Фиксированный неправильный счетчик повторных попыток в сообщениях об ошибках: теперь корректно показывает фактическое количество попыток вместо настроенных maxRetries\n- Обновленные значения конфигурации по умолчанию\n- maxRetries: 3\n- requestTimeout: 3000ms\n- pollInterval: 20000ms\n- FastPollInterval: 5000 мс\nДобавлено 7-дневное охлаждение до конфигурации зависимого робота\nРазделите changelog на README.md (текущий) и CHANGELOG OLD.md (исторические записи)\nОбновлена вся документация с новыми значениями по умолчанию\n\n> Более старые записи changelog доступны в [CHANGELOG OLD.md] (./CHANGELOG OLD.md)",
+        "pt": "- Contador de repetição incorreto corrigido nas mensagens de erro: agora mostra corretamente o número real de tentativas em vez de maxRetries configurado\n- Valores de configuração padrão atualizados\n- MaxRetries: 3\n- requestTimeout: 3000ms\n- pollInterval: 20000ms\n- fastPollInterval: 5000ms\n- Adicionado arrefecimento de 7 dias para configuração dependebot\n- Dividir changelog em README.md (atual) e CHANGELOG OLD.md (entradas históricas)\n- Atualizado toda a documentação com novos valores padrão\n\n> Entradas antigas do changelog estão disponíveis em [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "nl": "- Fixed incorrecte retry teller in foutmeldingen: nu correct toont werkelijke aantal pogingen in plaats van geconfigureerde maxRetries\n- Bijgewerkte standaard instellingen\n- maxReacties: 3\n- verzoekTimeout: 3000ms\n- pollInterval: 20000m\n- fastPollInterval: 5000ms\n- 7 dagen cooldown toegevoegd aan dependabot configuratie\n- Splitsing changelog in README.md (huidig) en Changelog OLD.md (historische items)\n- Alle documentatie bijgewerkt met nieuwe standaardwaarden\n\n> Oudere wijzigingen zijn beschikbaar in [CHANGLOG OLD.md](./CHANGLOG OLD.md)",
+        "fr": "- Correction d'un compteur de réessayer incorrect dans les messages d'erreur : affiche maintenant correctement le nombre réel de tentatives au lieu de maxRetries configurées\n- Valeurs de configuration par défaut actualisées\n- maxRetries: 3\n- requestTimeout: 3000ms\n- sondageIntervalle: 20000ms\n- RapidPollInterval: 5000ms\n- Ajout d'un cooldown de 7 jours à la configuration de dependabot\n- Diviser le changelog en README.md (courant) et CHANGELOG OLD.md (entrées historiques)\n- Mise à jour de toute la documentation avec de nouvelles valeurs par défaut\n\n> Les entrées de changement les plus anciennes sont disponibles dans [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "it": "- Corretto contatore di riprovazione errato nei messaggi di errore: ora mostra correttamente il numero effettivo di tentativi invece di maxRetries configurato\n- Valori di configurazione di default aggiornati\n- maxRetries: 3\n- richiestaTimeout: 3000ms\n- sondaggioIntervallo: 20000ms\n- fastPollInterval: 5000ms\n- Aggiunto 7 giorno cooldown per la configurazione dipendeabot\n- Dividere il changelog in README.md (current) e CHANGELOG OLD.md (ingressi storici)\n- Aggiornata tutta la documentazione con nuovi valori di default\n\n> Le voci più vecchie sono disponibili in [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "es": "- Corregido contador de reingreso incorrecto en mensajes de error: ahora correctamente muestra el número real de intentos en lugar de maxRetries configurados\n- Valores de configuración predeterminados actualizados\n- maxRetries: 3\n- requestTimeout: 3000ms\n- votaciónIntervalo: 20000ms\n- fastPollInterval: 5000ms\n- Se agregó 7 días de refrigeración a la configuración de dependabot\n- Dividir el cambio en README.md (actual) y CHANGELOG OLD.md (entradas históricas)\n- Actualizado toda la documentación con nuevos valores predeterminados\n\nLas entradas de cambio más antiguas están disponibles en [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "pl": "- Naprawiono nieprawidłowy licznik powtórzeń w komunikatach błędów: teraz poprawnie pokazuje rzeczywistą liczbę prób zamiast skonfigurowanych maxRetries\n- Aktualizacja domyślnych wartości konfiguracyjnych\n- maxRetries: 3\n- requestTimeout: 3000ms\n- pylInterval: 20000ms\n- fastPolling Interval: 5000ms\n- Dodano 7 dni chłodzenia do konfiguracji zależnej\n- Split changelog into README.md (current) and CHANGELOG _ OLD.md (historical entributions)\n- Aktualizacja dokumentacji z nowymi wartościami domyślnymi\n\n> Wpisy dotyczące starszych zmian są dostępne w [CHANGELOG _ OLD.md] (. / CHANGELOG _ OLD.md)",
+        "uk": "- Виправлено неправильний лічильник трейдингу в повідомленнях про помилки: тепер правильно показує фактичну кількість спроб замість налаштованих maxRetries\n- Оновлені значення конфігурації за замовчуванням\n- макс.Ретри: 3\n- запитTimeout: 3000ms\n- обпилювачі: 20000м\n- FastPollInterval: 5000м\n- Додано 7 день охолодження для конфігурації залежного\n- Спліт зміни в README.md (поточний) і CHANGELOG OLD.md (гісторичні записи)\n- Оновлена документація з новими значеннями за замовчуванням\n\n> Старший журнал змін доступний в [CHANGELOG OLD.md](./CHANGELOG OLD.md)",
+        "zh-cn": "- 错误信件中固定的不正确的重试计数器:现在正确显示实际的尝试次数,而不是配置的最大重试次数\n- 更新默认配置值\n- 最大盘点:3次\n- 请求超时:3 000ms\n- 民意调查:2000米\n- 快速PollInterval: 5000毫秒\n- 添加了7天的冷却器,用于依赖破坏配置\n- 将更改日志分为 README.md (当前) 和 ChangeGELOG OLD.md (历史条目)\n- 用新的默认值更新所有文档\n\n> 旧的更改日志条目可见于 [CHANGELOG OLD.md] (./CHANGELOG OLD.md)"
+      },
       "0.1.10": {
         "en": "Fix author field in package.json from object to string\nRemove empty supportedMessages from io-package.json\nRemove duplicate channel creation from initStates()\nRemove redundant Object.assign prototype inheritance\nPass adapter instance to _requestQueue.clear() on unload\nFix control.mode role from switch.mode to value\nFix power.pvVoltage and power.pvCurrent roles to value.voltage/value.current\nFix energymeter.ctState role and add states map\nFix network.rssi role from value.signal to value\nFix info.firmware role from value to text\nAdd loglevel and readme fields to io-package.json common\nAdd enabled: false to io-package.json common\nFix setSettings: use extendForeignObjectAsync with dynamic namespace\nFix info.connection role: use indicator.reachable for device connection state",
         "de": "Autor-Feld in package.json von Objekt zu String korrigiert\nLeere supportedMessages aus io-package.json entfernt\nDoppelte Kanalerstellung aus initStates() entfernt\nÜberflüssige Object.assign Prototyp-Vererbung entfernt\nAdapter-Instanz an _requestQueue.clear() beim Entladen übergeben\ncontrol.mode Rolle von switch.mode zu value korrigiert\npower.pvVoltage und power.pvCurrent Rollen auf value.voltage/value.current korrigiert\nenergymeter.ctState Rolle korrigiert und States-Map hinzugefügt\nnetwork.rssi Rolle von value.signal zu value korrigiert\ninfo.firmware Rolle von value zu text korrigiert\nloglevel und readme Felder zu io-package.json common hinzugefügt\nenabled: false zu io-package.json common hinzugefügt\nsetSettings korrigiert: Nutze extendForeignObjectAsync mit dynamischem Namespace\ninfo.connection Rolle korrigiert: Nutze indicator.reachable für Geräteverbindungsstatus",
@@ -129,10 +155,10 @@
   "native": {
     "ipAddress": "",
     "udpPort": 30000,
-    "pollInterval": 10000,
-    "fastPollInterval": 1000,
-    "requestTimeout": 5000,
-    "maxRetries": 1,
+    "pollInterval": 20000,
+    "fastPollInterval": 5000,
+    "requestTimeout": 3000,
+    "maxRetries": 3,
     "autoDiscovery": true
   },
   "instanceObjects": [
