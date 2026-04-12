@@ -81,6 +81,7 @@
     },
     "platform": "Javascript/Node.js",
     "mode": "daemon",
+    "compact": true,
     "tier": 3,
     "noConfig": false,
     "noIntro": false,

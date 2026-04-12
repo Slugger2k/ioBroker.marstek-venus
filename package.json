@@ -36,10 +36,8 @@
     "@iobroker/testing": "^5.2.2",
     "@iobroker/types": "^7.1.1",
     "@types/node": "^20.0.0",
-    "chai": "^4.5.0",
     "eslint": "^9.39.4",
     "nyc": "^18.0.0",
-    "sinon": "^21.1.0",
     "typescript": "^5.0.0"
   },
   "main": "main.js",
