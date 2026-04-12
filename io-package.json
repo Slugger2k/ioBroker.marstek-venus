@@ -111,8 +111,7 @@
     ],
     "adminUI": {
       "config": "json"
-    },
-    "supportedMessages": {}
+    }
   },
   "native": {
     "ipAddress": "",
