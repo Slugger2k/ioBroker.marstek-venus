@@ -331,6 +331,8 @@ class MarstekVenusAdapter extends utils.Adapter {
 					obj.callback,
 				);
 			}
+		} else {
+			this.log.debug(`Unknown message command received: ${obj.command}`);
 		}
 	}
 
