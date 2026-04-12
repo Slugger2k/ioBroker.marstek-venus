@@ -186,20 +186,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-##
-### 0.1.12 (2026-04-12)
-- new release
+## Changelog
+### **WORK IN PROGRESS**
 
-### 0.1.11 (2026-04-12)
-- Fixed incorrect retry counter in error messages: now correctly shows actual number of attempts instead of configured maxRetries
-- Updated default configuration values
-  - maxRetries: 3
-  - requestTimeout: 3000ms
-  - pollInterval: 20000ms
-  - fastPollInterval: 5000ms
-- Added 7 day cooldown to dependabot configuration
-- Split changelog into README.md (current) and CHANGELOG_OLD.md (historical entries)
-- Updated all documentation with new default values
+
 
 > Older changelog entries are available in [CHANGELOG_OLD.md](./CHANGELOG_OLD.md)
 

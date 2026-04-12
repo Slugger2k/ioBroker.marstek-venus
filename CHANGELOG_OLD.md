@@ -4,6 +4,20 @@ All changelog entries prior to the current version are stored here.
 
 ---
 
+### 0.1.12 (2026-04-12)
+- new release
+
+### 0.1.11 (2026-04-12)
+- Fixed incorrect retry counter in error messages: now correctly shows actual number of attempts instead of configured maxRetries
+- Updated default configuration values
+    - maxRetries: 3
+    - requestTimeout: 3000ms
+    - pollInterval: 20000ms
+    - fastPollInterval: 5000ms
+- Added 7 day cooldown to dependabot configuration
+- Split changelog into README.md (current) and CHANGELOG_OLD.md (historical entries)
+- Updated all documentation with new default values
+- 
 ### 0.1.10 (2026-04-12)
 - fix adapter checker issues
 - dependebot updates
