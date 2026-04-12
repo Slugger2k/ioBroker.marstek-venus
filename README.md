@@ -186,10 +186,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Changelog <!--
-Placeholder for the next version (at the beginning of the line):
-## **WORK IN PROGRESS**
--->
+## Changelog 
+
+### **WORK IN PROGRESS**
 
 ## 0.1.7 (2026-04-12)
 - fix adapter checker issues
