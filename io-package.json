@@ -1,6 +1,6 @@
 {
   "common": {
-    "name": "marstek-venus",
+    "name": "marstek_venus",
     "version": "0.1.4",
     "title": "Marstek Venus",
     "titleLang": {
@@ -8,13 +8,18 @@
       "de": "Marstek Venus Energiespeicher"
     },
     "desc": {
-      "en": "Adapter for Marstek Venus C/D/E energy storage devices"
+      "en": "Adapter for Marstek Venus C/D/E energy storage devices",
+      "de": "Adapter für Marstek Venus C/D/E Energiespeichergeräte"
     },
     "descLang": {
       "en": "Integrates Marstek Venus battery inverters with ioBroker using official local Open API",
       "de": "Integriert Marstek Venus Batteriewechselrichter mit ioBroker über die offizielle lokale Open API"
     },
     "news": {
+      "0.1.4": {
+        "en": "Fixed repository validation issues, updated adapter naming conventions",
+        "de": "Repository-Validierungsprobleme behoben, Adapter-Namenskonventionen aktualisiert"
+      },
       "0.1.2": {
         "en": "Removed invalid ES.GetInfo call, device info obtained via discovery only",
         "de": "Ungültiger ES.GetInfo Aufruf entfernt, Geräteinformationen werden nur über Discovery abgerufen"
@@ -28,7 +33,7 @@
       }
     },
     "icon": "marstek-venus.png",
-    "extIcon": "https://raw.githubusercontent.com/Slugger2k/ioBroker.marstek-venus/master/admin/marstek-venus.png",
+    "extIcon": "https://raw.githubusercontent.com/Slugger2k/ioBroker.marstek_venus/master/admin/marstek-venus.png",
     "type": "energy",
     "authors": [
       "ioBroker Community"
@@ -61,9 +66,9 @@
     "supportedMessages": [
       "sendTo"
     ],
-    "readme": "https://github.com/Slugger2k/ioBroker.marstek-venus#readme",
-    "bugs": "https://github.com/Slugger2k/ioBroker.marstek-venus/issues",
-    "changelog": "https://github.com/Slugger2k/ioBroker.marstek-venus/blob/master/CHANGELOG.md"
+    "readme": "https://github.com/Slugger2k/ioBroker.marstek_venus#readme",
+    "bugs": "https://github.com/Slugger2k/ioBroker.marstek_venus/issues",
+    "changelog": "https://github.com/Slugger2k/ioBroker.marstek_venus/blob/master/CHANGELOG.md"
   },
   "native": {
     "ipAddress": "",
