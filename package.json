@@ -34,7 +34,7 @@
     "@iobroker/testing": "^5.2.2",
     "@iobroker/types": "^7.1.1",
     "@types/node": "^25.5.2",
-    "eslint": "^9.39.4",
+    "eslint": "^10.2.0",
     "nyc": "^18.0.0",
     "typescript": "^6.0.2"
   },
