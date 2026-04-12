@@ -68,9 +68,7 @@
     },
     "platform": "Javascript/Node.js",
     "mode": "daemon",
-    "compact": true,
     "tier": 3,
-    "supportedCompact": true,
     "noConfig": false,
     "noIntro": false,
     "connectionType": "local",
@@ -82,7 +80,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.6.17"
+        "admin": ">=7.6.20"
       }
     ],
     "keywords": [

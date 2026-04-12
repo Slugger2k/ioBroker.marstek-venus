@@ -2,7 +2,6 @@
 [![npm version](https://img.shields.io/npm/v/iobroker.marstek-venus.svg)](https://www.npmjs.com/package/iobroker.marstek-venus)
 [![Downloads](https://img.shields.io/npm/dt/iobroker.marstek-venus.svg)](https://www.npmjs.com/package/iobroker.marstek-venus)
 [![Build Status](https://github.com/Slugger2k/ioBroker.marstek-venus/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/Slugger2k/ioBroker.marstek-venus/actions)
-[![Integration Tests](https://github.com/Slugger2k/ioBroker.marstek-venus/actions/workflows/test-and-release.yml/badge.svg?label=Integration)](https://github.com/Slugger2k/ioBroker.marstek-venus/actions)
 
 # ioBroker.marstek-venus Adapter
 
@@ -186,6 +185,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Changelog <!--
+Placeholder for the next version (at the beginning of the line):
+## **WORK IN PROGRESS**
+-->
+
+## 0.1.6 (2026-04-12)
+- Removed invalid ES.GetInfo call which was causing Method not found errors
+- Device information is now obtained exclusively during discovery
+
+## 0.1.5 (2026-04-11)
+- Initial release with full Marstek Venus Open API support
 
 ## Support
 

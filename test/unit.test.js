@@ -108,7 +108,7 @@ describe("MarstekVenusAdapter", function () {
 
 	beforeEach(() => {
 		sandbox = sinon.createSandbox();
-		clock = sandbox.useFakeTimers();
+		clock = sandbox.useFakeTimers({ shouldClearNativeTimers: true });
 
 		// Reset socket mock completely
 		mockSocket.on.resetHistory();

@@ -13,7 +13,7 @@ describe("RateLimitQueue", function () {
 	this.timeout(10000);
 
 	beforeEach(() => {
-		clock = sinon.useFakeTimers();
+		clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 	});
 
 	afterEach(() => {
@@ -115,7 +115,7 @@ describe("RateLimitQueue", function () {
 			expect(runSpy.called).to.be.false;
 			expect(queue._timer).to.not.be.null;
 			Date.now.restore();
-			clock = sinon.useFakeTimers();
+			clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 		});
 
 		it("calls _runNextTask when fake timers", () => {
@@ -212,7 +212,7 @@ describe("RateLimitQueue", function () {
 			queue._onTaskComplete();
 			expect(queue._lastExecutionTime).to.equal(1234567890);
 			Date.now = originalNow;
-			clock = sinon.useFakeTimers();
+			clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 		});
 
 		it("removes completed task from queue", () => {
@@ -271,7 +271,7 @@ describe("RateLimitQueue", function () {
 			expect(queue._timer).to.not.be.null;
 			queue.clear();
 			expect(queue._timer).to.be.null;
-			clock = sinon.useFakeTimers();
+			clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 		});
 
 		it("rejects all pending tasks (lines 106-108)", () => {
@@ -341,7 +341,7 @@ describe("RateLimitQueue", function () {
 
 			await new Promise(resolve => setTimeout(resolve, 350));
 			expect(results).to.deep.equal([1, 2, 3]);
-			clock = sinon.useFakeTimers();
+			clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 		});
 
 		it("handles rapid sequential enqueues", async () => {
