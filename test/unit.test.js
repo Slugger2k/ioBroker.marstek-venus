@@ -821,25 +821,7 @@ describe('MarstekVenusAdapter', function() {
             expect(adapter.log.warn.calledWithMatch(/BLE.GetStatus failed/)).to.be.true;
         });
 
-        it('pollInfoStatus updates device info states', async () => {
-            adapter.sendRequest = sandbox.stub().resolves({
-                device: 'Venus C',
-                ver: 123,
-                ble_mac: 'AA:BB:CC:DD:EE:FF'
-            });
 
-            await adapter.pollInfoStatus();
-            expect(adapter.setStateChangedAsync.calledWith('info.device', { val: 'Venus C', ack: true })).to.be.true;
-            expect(adapter.setStateChangedAsync.calledWith('info.firmware', { val: 123, ack: true })).to.be.true;
-            expect(adapter.setStateChangedAsync.calledWith('info.mac', { val: 'AA:BB:CC:DD:EE:FF', ack: true })).to.be.true;
-        });
-
-        it('pollInfoStatus handles errors gracefully', async () => {
-            adapter.sendRequest = sandbox.stub().rejects(new Error('Info error'));
-
-            await adapter.pollInfoStatus();
-            expect(adapter.log.warn.calledWithMatch(/ES.GetInfo failed/)).to.be.true;
-        });
 
         it('pollPower updates all power states', async () => {
             adapter.sendRequest = sandbox.stub().resolves({
@@ -972,12 +954,10 @@ describe('MarstekVenusAdapter', function() {
         });
 
         it('pollSlow calls all slow poll functions', async () => {
-            adapter.pollInfoStatus = sandbox.stub().resolves();
             adapter.pollWifiStatus = sandbox.stub().resolves();
             adapter.pollBLEStatus = sandbox.stub().resolves();
 
             await adapter.pollSlow();
-            expect(adapter.pollInfoStatus.called).to.be.true;
             expect(adapter.pollWifiStatus.called).to.be.true;
             expect(adapter.pollBLEStatus.called).to.be.true;
         });
