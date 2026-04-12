@@ -102,7 +102,7 @@ describe("RateLimitQueue", function () {
 			expect(runSpy.called).to.be.false;
 		});
 
-		it("schedules timer when not fake and interval not elapsed (lines 41-49)", () => {
+		it("schedules timer when not fake and interval not elapsed", () => {
 			clock.restore();
 			queue = new RateLimitQueue({ intervalMs: 1000 });
 			queue._isFake = false;
@@ -138,7 +138,7 @@ describe("RateLimitQueue", function () {
 	});
 
 	describe("_runNextTask()", () => {
-		it("does nothing when busy (line 58)", () => {
+		it("does nothing when busy", () => {
 			queue = new RateLimitQueue();
 			queue._busy = true;
 			const taskFn = sinon.stub();
@@ -163,7 +163,7 @@ describe("RateLimitQueue", function () {
 			expect(taskFn.called).to.be.false;
 		});
 
-		it("rejects task when function throws (lines 68-70)", async () => {
+		it("rejects task when function throws", async () => {
 			queue = new RateLimitQueue();
 			const error = new Error("Task failed");
 			const taskFn = sinon.stub().throws(error);
@@ -174,7 +174,7 @@ describe("RateLimitQueue", function () {
 			expect(queue._busy).to.be.false;
 		});
 
-		it("resolves task when function returns non-promise (lines 85-86)", async () => {
+		it("resolves task when function returns non-promise", async () => {
 			queue = new RateLimitQueue();
 			const taskFn = sinon.stub().returns("result");
 			const resolveSpy = sinon.stub();
@@ -230,7 +230,7 @@ describe("RateLimitQueue", function () {
 			expect(queue._busy).to.be.false;
 		});
 
-		it("processes next task when queue has more items (lines 95-96)", () => {
+		it("processes next task when queue has more items", () => {
 			queue = new RateLimitQueue();
 			queue.queue.push(
 				{ fn: sinon.stub().returns("result1"), resolve: sinon.stub(), reject: sinon.stub() },
@@ -255,13 +255,13 @@ describe("RateLimitQueue", function () {
 	});
 
 	describe("clear()", () => {
-		it("sets shutting down flag (line 101)", () => {
+		it("sets shutting down flag", () => {
 			queue = new RateLimitQueue();
 			queue.clear();
 			expect(queue._shuttingDown).to.be.true;
 		});
 
-		it("clears pending timer (lines 102-105)", () => {
+		it("clears pending timer", () => {
 			clock.restore();
 			queue = new RateLimitQueue({ intervalMs: 1000 });
 			queue._isFake = false;
@@ -274,7 +274,7 @@ describe("RateLimitQueue", function () {
 			clock = sinon.useFakeTimers({ shouldClearNativeTimers: true });
 		});
 
-		it("rejects all pending tasks (lines 106-108)", () => {
+		it("rejects all pending tasks", () => {
 			queue = new RateLimitQueue();
 			const reject1 = sinon.stub();
 			const reject2 = sinon.stub();
@@ -288,14 +288,14 @@ describe("RateLimitQueue", function () {
 			expect(reject1.args[0][0].message).to.equal("Queue cleared");
 		});
 
-		it("clears queue (line 109)", () => {
+		it("clears queue", () => {
 			queue = new RateLimitQueue();
 			queue.queue.push({ fn: sinon.stub(), resolve: sinon.stub(), reject: sinon.stub() });
 			queue.clear();
 			expect(queue.queue.length).to.equal(0);
 		});
 
-		it("sets busy to false (line 110)", () => {
+		it("sets busy to false", () => {
 			queue = new RateLimitQueue();
 			queue._busy = true;
 			queue.clear();
@@ -304,7 +304,7 @@ describe("RateLimitQueue", function () {
 	});
 
 	describe("size()", () => {
-		it("returns queue length (line 113-114)", () => {
+		it("returns queue length", () => {
 			queue = new RateLimitQueue();
 			queue.queue.push({ fn: sinon.stub(), resolve: sinon.stub(), reject: sinon.stub() });
 			queue.queue.push({ fn: sinon.stub(), resolve: sinon.stub(), reject: sinon.stub() });

@@ -36,6 +36,7 @@ jobs:
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
+    needs: check-and-lint
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -69,5 +70,4 @@ jobs:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           node-version: '20.x'
-          npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

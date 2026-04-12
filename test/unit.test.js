@@ -209,7 +209,7 @@ describe("MarstekVenusAdapter", function () {
 				expect(adapter._slowPollTimer).to.not.be.null;
 			});
 
-			it("logs socket error when error event occurs (line 40)", async () => {
+			it("logs socket error when error event occurs", async () => {
 				await adapter.onReady();
 				const errorHandler = mockSocket.on.getCall(0).args[1];
 				const error = new Error("Test socket error");
@@ -251,7 +251,7 @@ describe("MarstekVenusAdapter", function () {
 				expect(adapter.sendTo.called).to.be.true;
 			});
 
-			it("handles setSettings command (lines 209-215)", async () => {
+			it("handles setSettings command", async () => {
 				adapter.config.autoDiscovery = false;
 				adapter.config.ipAddress = "192.168.1.50";
 				adapter.config.udpPort = 30000;
@@ -338,7 +338,7 @@ describe("MarstekVenusAdapter", function () {
 			}
 		});
 
-		it("retries request on timeout (lines 99-100)", async () => {
+		it("retries request on timeout", async () => {
 			adapter._requestQueue._shuttingDown = false;
 			adapter._requestQueue.queue = [];
 			adapter._requestQueue._busy = false;
@@ -524,7 +524,7 @@ describe("MarstekVenusAdapter", function () {
 			).to.be.true;
 		});
 
-		it("handles Passive mode with null power/duration (lines 23-24)", async () => {
+		it("handles Passive mode with null power/duration", async () => {
 			adapter.getStateAsync.withArgs("control.passivePower").resolves(null);
 			adapter.getStateAsync.withArgs("control.passiveDuration").resolves(null);
 
@@ -553,7 +553,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.sendRequest.calledWith("ES.SetMode", sinon.match.has("config"))).to.be.true;
 		});
 
-		it("handles Manual mode with null values (lines 34-39)", async () => {
+		it("handles Manual mode with null values", async () => {
 			adapter.getStateAsync.withArgs("control.manualTimeNum").resolves(null);
 			adapter.getStateAsync.withArgs("control.manualStartTime").resolves(null);
 			adapter.getStateAsync.withArgs("control.manualEndTime").resolves(null);
@@ -1270,7 +1270,7 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("sendRequest PLACEHOLDER handling (lines 97-114)", () => {
+	describe("sendRequest PLACEHOLDER handling", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
 			clock.tick(2000);
@@ -1293,7 +1293,7 @@ describe("MarstekVenusAdapter", function () {
 			adapter._requestQueue._busy = false;
 		});
 
-		it("returns existing promise when method already pending (lines 117-120)", async () => {
+		it("returns existing promise when method already pending", async () => {
 			const expectedResult = { result: "existing" };
 			const existingPromise = Promise.resolve(expectedResult);
 			adapter._pendingRequestsByMethod.set("Test.Unique.Method.123", existingPromise);
@@ -1306,7 +1306,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.log.debug.calledWithMatch(/already pending/)).to.be.true;
 		});
 
-		it("waits for PLACEHOLDER to be replaced when method has PLACEHOLDER (lines 96-114)", async () => {
+		it("waits for PLACEHOLDER to be replaced when method has PLACEHOLDER", async () => {
 			adapter._pendingRequestsByMethod.set("Test.Unique.Method.456", Symbol("pending"));
 
 			const resultPromise = adapter.sendRequest("Test.Unique.Method.456", {});
@@ -1320,14 +1320,14 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("startPolling (lines 257-258)", () => {
+	describe("startPolling", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
 			adapter._pendingRequests.clear();
 			adapter._pendingRequestsByMethod = new Map();
 		});
 
-		it("clears existing _normalPollTimer before creating new one (lines 256-258)", () => {
+		it("clears existing _normalPollTimer before creating new one", () => {
 			const oldTimer = adapter._normalPollTimer;
 			expect(oldTimer).to.not.be.null;
 
@@ -1348,14 +1348,14 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("startSlowPolling (lines 272-273)", () => {
+	describe("startSlowPolling", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
 			adapter._pendingRequests.clear();
 			adapter._pendingRequestsByMethod = new Map();
 		});
 
-		it("clears existing _slowPollTimer before creating new one (lines 271-273)", () => {
+		it("clears existing _slowPollTimer before creating new one", () => {
 			const oldTimer = adapter._slowPollTimer;
 			expect(oldTimer).to.not.be.null;
 
@@ -1396,14 +1396,14 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("onMessage setSettings (lines 317-321)", () => {
+	describe("onMessage setSettings", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
 			adapter._pendingRequests.clear();
 			adapter._pendingRequestsByMethod = new Map();
 		});
 
-		it("sends success response for setSettings command (lines 316-318)", async () => {
+		it("sends success response for setSettings command", async () => {
 			const msgObj = {
 				command: "setSettings",
 				from: "admin.0",
@@ -1426,14 +1426,14 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("onUnload cleanup (lines 355-356, 359, 362-363, 365-368)", () => {
+	describe("onUnload cleanup", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
 			adapter._pendingRequests.clear();
 			adapter._pendingRequestsByMethod = new Map();
 		});
 
-		it("clears _fastPollTimer (lines 354-356)", () => {
+		it("clears _fastPollTimer", () => {
 			const clearIntervalSpy = sandbox.spy(adapter, "clearInterval");
 			adapter._fastPollTimer = 111;
 
@@ -1442,7 +1442,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(clearIntervalSpy.calledWith(111)).to.be.true;
 		});
 
-		it("clears _slowPollTimer (lines 350-352)", () => {
+		it("clears _slowPollTimer", () => {
 			const clearIntervalSpy = sandbox.spy(adapter, "clearInterval");
 			adapter._slowPollTimer = 222;
 
@@ -1451,7 +1451,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(clearIntervalSpy.calledWith(222)).to.be.true;
 		});
 
-		it("clears _normalPollTimer (lines 346-348)", () => {
+		it("clears _normalPollTimer", () => {
 			const clearIntervalSpy = sandbox.spy(adapter, "clearInterval");
 			adapter._normalPollTimer = 333;
 
@@ -1460,7 +1460,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(clearIntervalSpy.calledWith(333)).to.be.true;
 		});
 
-		it("clears _requestQueue (line 359)", () => {
+		it("clears _requestQueue", () => {
 			const clearStub = sandbox.stub();
 			adapter._requestQueue = { clear: clearStub };
 
@@ -1469,7 +1469,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(clearStub.calledOnce).to.be.true;
 		});
 
-		it("closes socket (lines 361-362)", () => {
+		it("closes socket", () => {
 			const closeStub = sandbox.stub();
 			adapter._socket = { close: closeStub };
 
@@ -1478,7 +1478,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(closeStub.calledOnce).to.be.true;
 		});
 
-		it("rejects pending requests with shutdown error (lines 365-368)", () => {
+		it("rejects pending requests with shutdown error", () => {
 			const rejectStub = sandbox.stub();
 			adapter._pendingRequests.set("req1", {
 				timeout: null,
@@ -1493,7 +1493,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter._pendingRequests.size).to.equal(0);
 		});
 
-		it("always calls callback even on error (lines 371-374)", () => {
+		it("always calls callback even on error", () => {
 			adapter._requestQueue = null;
 			adapter._socket = null;
 
@@ -1505,7 +1505,7 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("copyMethods helper (line 388)", () => {
+	describe("copyMethods helper", () => {
 		it("handles null source gracefully", () => {
 			expect(() => {
 				const source = null;
@@ -1516,7 +1516,7 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
-	describe("module exports (lines 413-417)", () => {
+	describe("module exports", () => {
 		it("exports MarstekVenusAdapter class", () => {
 			expect(MarstekVenusAdapter).to.be.a("function");
 		});
