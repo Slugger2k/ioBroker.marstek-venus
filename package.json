@@ -1,6 +1,6 @@
 {
   "name": "iobroker.marstek-venus",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "ioBroker adapter for Marstek Venus C/D/E energy storage devices",
   "author": "Slugger2k",
   "homepage": "https://github.com/Slugger2k/ioBroker.marstek-venus",

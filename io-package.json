@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
