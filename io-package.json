@@ -28,10 +28,6 @@
       "uk": "Адаптер для пристроїв накопичення енергії Marstek Venus C/D/E",
       "zh-cn": "Marstek Venus C/D/E 储能设备适配器"
     },
-    "descLang": {
-      "en": "Integrates Marstek Venus battery inverters with ioBroker using official local Open API",
-      "de": "Integriert Marstek Venus Batteriewechselrichter mit ioBroker über die offizielle lokale Open API"
-    },
     "news": {
       "0.1.4": {
         "en": "Fixed repository validation issues, updated adapter naming conventions",
@@ -68,9 +64,12 @@
     "dataSource": "poll",
     "dependencies": [
       {
-        "js-controller": ">=5.0.19"
+        "js-controller": ">=6.0.11"
       }
     ],
+    "globalDependencies": {
+      "admin": ">=7.6.17"
+    },
     "keywords": [
       "marstek",
       "venus",
@@ -80,15 +79,8 @@
       "inverter",
       "pv"
     ],
-    "logLevel": "info",
-    "translated": false,
     "adminUI": {"config": "json"},
-    "supportedMessages": [
-      "sendTo"
-    ],
-    "readme": "https://github.com/Slugger2k/ioBroker.marstek-venus#readme",
-    "bugs": "https://github.com/Slugger2k/ioBroker.marstek-venus/issues",
-    "changelog": "https://github.com/Slugger2k/ioBroker.marstek-venus/blob/master/CHANGELOG.md"
+    "supportedMessages": {}
   },
   "native": {
     "ipAddress": "",
