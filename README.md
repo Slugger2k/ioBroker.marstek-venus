@@ -188,6 +188,9 @@ SOFTWARE.
 
 ## Changelog
 
+### **WORK IN PROGRESS**
+- fix adapter checker issues
+
 ### 0.1.8 (2026-04-12)
 - fix adapter checker issues
 
