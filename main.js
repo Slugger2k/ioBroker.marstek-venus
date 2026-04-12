@@ -214,7 +214,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 						this.log.info(`Auto-selecting discovered device: ${this._discoveredIP}`);
 						this.startPolling();
 						this.setStateAsync("info.device", { val: response.result.device, ack: true });
-						this.setStateAsync("info.firmware", { val: response.result.ver, ack: true });
+						this.setStateAsync("info.firmware", { val: String(response.result.ver), ack: true });
 						this.setStateAsync("info.mac", {
 							val: response.result.ble_mac || response.result.wifi_mac,
 							ack: true,
@@ -252,7 +252,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startPolling() {
-		this.log.info("Starting polling loop");
+		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 10000}ms)`);
 		if (this._normalPollTimer) {
 			this.clearInterval(this._normalPollTimer);
 			this._normalPollTimer = null;
@@ -301,8 +301,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 			this.config.udpPort = settings.udpPort;
 			this.config.pollInterval = settings.pollInterval;
 
-			await this.setObject("system.adapter.marstek-venus.0", {
-				type: "instance",
+			await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
 				native: {
 					autoDiscovery: settings.autoDiscovery,
 					ipAddress: settings.ipAddress,

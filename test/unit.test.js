@@ -25,6 +25,7 @@ sinon.stub(dgram, "createSocket").returns(mockSocket);
 class MockAdapterBase {
 	constructor(options) {
 		this.name = options.name;
+		this.namespace = options.name + ".0";
 		this.config = options.config;
 		this.log = {
 			info: sinon.stub(),
@@ -35,6 +36,7 @@ class MockAdapterBase {
 		this.setStateAsync = sinon.stub().resolves();
 		this.setStateChangedAsync = sinon.stub().resolves();
 		this.setObject = sinon.stub().resolves();
+		this.extendForeignObjectAsync = sinon.stub().resolves();
 		this.setObjectNotExistsAsync = sinon.stub().resolves();
 		this.getStateAsync = sinon.stub().resolves();
 		this.subscribeStatesAsync = sinon.stub().resolves();
