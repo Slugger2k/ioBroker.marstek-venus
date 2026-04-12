@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
@@ -29,6 +29,19 @@
       "zh-cn": "Marstek Venus A/C/D/E 储能设备适配器"
     },
     "news": {
+      "0.1.13": {
+        "en": "Added Venus A device support to adapter descriptions\nUpdated all documentation to include Venus A in the supported devices list\nFix: validate and sanitize all `setSettings` input values (type coercion, numeric range clamping, IP whitespace trim) to prevent security issues",
+        "de": "Hinzugefügt Venus Eine Geräteunterstützung für Adapterbeschreibungen\nAktualisiert alle Dokumentationen, um Venus A in die unterstützte Geräteliste aufzunehmen\nFix: validieren und sanitize alle `setSettings` Eingabewerte (Typ Coercion, numerische Bereich Klemmung, IP Whitespace Trimm) um Sicherheitsprobleme zu verhindern",
+        "ru": "Добавлена Венера Устройство поддерживает описания адаптера\nОбновлена вся документация для включения Венеры А в список поддерживаемых устройств\nИсправление: проверка и дезинфицирование всех входных значений «настройки» (принуждение типа, зажим числового диапазона, обрезка IP-пространства) для предотвращения проблем безопасности",
+        "pt": "Venus Adicionado Um suporte de dispositivo para descrições do adaptador\nAtualizou toda a documentação para incluir Vênus A na lista de dispositivos suportados\nCorrigir: validar e higienizar todos os valores de entrada `setSettings' (coerção de tipo, clampeamento de alcance numérico, corte de espaço branco IP) para evitar problemas de segurança",
+        "nl": "Toegevoegd Venus Een apparaatondersteuning voor adapterbeschrijvingen\nAlle documentatie bijgewerkt om Venus A op te nemen in de lijst met ondersteunde apparaten\nFix: valideren en sanitize alle ",
+        "fr": "Venus ajouté Un support pour les descriptions d'adaptateur\nMise à jour de toute la documentation pour inclure Vénus A dans la liste des appareils pris en charge\nCorrection : valider et désinfecter toutes les valeurs d'entrée `setSettings` (contrainte de type, serrage de plage numérique, parage d'espace blanc IP) pour prévenir les problèmes de sécurité",
+        "it": "Aggiunto Venere Supporto del dispositivo per le descrizioni dell'adattatore\nAggiornata tutta la documentazione per includere Venus A nell'elenco dei dispositivi supportati\nFisso: convalidare e sanzionare tutti i valori di input `setSettings` (coercizione di tipo, morsetto di intervallo numerico, assetto di spazio bianco IP) per prevenire problemi di sicurezza",
+        "es": "Venus Soporte de dispositivo para las descripciones del adaptador\nActualizado toda la documentación para incluir a Venus A en la lista de dispositivos compatibles\nFijación: validar y sanitizar todos los valores de entrada de 'Configuración' (coacción de tipo, fijación de rango numérico, corte de espacio blanco IP) para prevenir problemas de seguridad",
+        "pl": "Dodano Wenus Obsługa urządzenia do opisu adaptera\nAktualizacja całej dokumentacji, aby włączyć Venus A na liście obsługiwanych urządzeń\nFix: walidacja i oczyszczanie wszystkich wartości wejściowych 'setSettings' (typ przymus, zaciśnięcie zakresu liczbowego, wykończenie IP whitespace), aby zapobiec problemom bezpieczeństwa",
+        "uk": "Доданий Венера Підтримка пристрою для описів адаптера\nОновлено всю документацію для включення Венери A в список підтримуваних пристроїв\nВиправлення: валідувати та утилізувати всі значення вводу `setSettings` (кодування типу, затискач для нумерного діапазону, обробка білого простору IP) для запобігання проблем безпеки",
+        "zh-cn": "添加金星 适配器描述的设备支持\n更新所有文档, 将金星 A 列入支持的设备列表\n修正:验证和消毒所有“设置”输入值(类型强制、数字范围夹、IP白空间裁),以防止安全问题"
+      },
       "0.1.12": {
         "en": "new release",
         "de": "neue veröffentlichung",

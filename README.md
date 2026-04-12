@@ -193,11 +193,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.13 (2026-04-12)
 - Added Venus A device support to adapter descriptions
 - Updated all documentation to include Venus A in the supported devices list
 - Fix: validate and sanitize all `setSettings` input values (type coercion, numeric range clamping, IP whitespace trim) to prevent security issues
-
 
 ### 0.1.12 (2026-04-12)
 - new release
