@@ -99,7 +99,7 @@
     "extIcon": "https://raw.githubusercontent.com/Slugger2k/ioBroker.marstek-venus/master/admin/marstek-venus.png",
     "type": "energy",
     "authors": [
-      "ioBroker Community"
+      "Slugger2k"
     ],
     "licenseInformation": {
       "license": "MIT",
