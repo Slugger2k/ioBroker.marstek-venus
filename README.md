@@ -199,7 +199,6 @@ SOFTWARE.
 ## 0.1.5 (2026-04-11)
 - Initial release with full Marstek Venus Open API support
 
-### **WORK IN PROGRESS**
 
 ## Support
 
