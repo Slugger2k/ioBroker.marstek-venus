@@ -191,6 +191,10 @@ Placeholder for the next version (at the beginning of the line):
 ## **WORK IN PROGRESS**
 -->
 
+## 0.1.7 (2026-04-12)
+- fix adapter checker issues
+- add npm deploy
+
 ## 0.1.6 (2026-04-12)
 - Removed invalid ES.GetInfo call which was causing Method not found errors
 - Device information is now obtained exclusively during discovery
