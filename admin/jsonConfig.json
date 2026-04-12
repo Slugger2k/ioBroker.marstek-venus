@@ -4,12 +4,12 @@
   "items": {
     "_header": {
       "type": "header",
-      "text": "$t:header",
+      "text": "header",
       "size": 2
     },
     "_info": {
       "type": "staticText",
-      "label": "$t:info",
+      "label": "info",
       "newLine": true,
       "xs": 12,
       "sm": 12,
@@ -19,7 +19,7 @@
     },
     "ipAddress": {
       "type": "text",
-      "label": "$t:ipAddress",
+      "label": "ipAddress",
       "placeholder": "192.168.1.xxx",
       "xs": 12,
       "sm": 6,
@@ -30,7 +30,7 @@
     },
     "udpPort": {
       "type": "number",
-      "label": "$t:udpPort",
+      "label": "udpPort",
       "min": 1,
       "max": 65535,
       "default": 30000,
@@ -42,7 +42,7 @@
     },
     "pollInterval": {
       "type": "number",
-      "label": "$t:pollInterval",
+      "label": "pollInterval",
       "min": 500,
       "max": 60000,
       "default": 10000,
@@ -55,7 +55,7 @@
     },
     "fastPollInterval": {
       "type": "number",
-      "label": "$t:fastPollInterval",
+      "label": "fastPollInterval",
       "min": 100,
       "max": 10000,
       "default": 1000,
@@ -67,7 +67,7 @@
     },
     "requestTimeout": {
       "type": "number",
-      "label": "$t:requestTimeout",
+      "label": "requestTimeout",
       "min": 1000,
       "max": 30000,
       "default": 5000,
@@ -80,7 +80,7 @@
     },
     "maxRetries": {
       "type": "number",
-      "label": "$t:maxRetries",
+      "label": "maxRetries",
       "min": 0,
       "max": 5,
       "default": 1,
@@ -92,7 +92,7 @@
     },
     "autoDiscovery": {
       "type": "checkbox",
-      "label": "$t:autoDiscovery",
+      "label": "autoDiscovery",
       "default": true,
       "xs": 12,
       "sm": 12,
