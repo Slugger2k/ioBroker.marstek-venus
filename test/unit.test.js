@@ -198,7 +198,7 @@ describe("MarstekVenusAdapter", function () {
 			it("initializes states and creates socket", async () => {
 				await adapter.onReady();
 
-				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(45);
+				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(40);
 				expect(adapter.subscribeStatesAsync.calledWith("control.*")).to.be.true;
 				expect(dgram.createSocket.calledWith("udp4")).to.be.true;
 				expect(mockSocket.bind.called).to.be.true;
