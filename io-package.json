@@ -42,32 +42,6 @@
         "uk": "виправити проблеми перевірки адаптера",
         "zh-cn": "固定适配器检查器问题"
       },
-      "0.1.8": {
-        "en": "fix adapter checker issues",
-        "de": "fix adapter checker probleme",
-        "ru": "исправить проблемы проверки адаптера",
-        "pt": "corrigir problemas de verificação do adaptador",
-        "nl": "adaptercontroleproblemen oplossen",
-        "fr": "correction des problèmes de vérification de l'adaptateur",
-        "it": "risolvere i problemi dell'adattatore checker",
-        "es": "solucionar problemas de control de adaptador",
-        "pl": "problemy z sprawdzaniem adaptera",
-        "uk": "виправити проблеми перевірки адаптера",
-        "zh-cn": "固定适配器检查器问题"
-      },
-      "0.1.7": {
-        "en": "fix adapter checker issues\nadd npm deploy",
-        "de": "fix adapter checker probleme\nnpm deploy hinzufügen",
-        "ru": "исправить проблемы проверки адаптера\nдобавить npm развертывание",
-        "pt": "corrigir problemas de verificação do adaptador\nadicionar a implantação do npm",
-        "nl": "adaptercontroleproblemen oplossen\nnpm-implementatie toevoegen",
-        "fr": "correction des problèmes de vérification de l'adaptateur\najouter npm deploy",
-        "it": "risolvere i problemi dell'adattatore checker\naggiungere npm deploy",
-        "es": "solucionar problemas de control de adaptador\nañadir npm despliegue",
-        "pl": "problemy z sprawdzaniem adaptera\ndodaj rozmieszczenie npm",
-        "uk": "виправити проблеми перевірки адаптера\nдодати npm розгортання",
-        "zh-cn": "固定适配器检查器问题\n添加 npm 部署"
-      },
       "0.1.6": {
         "en": "Removed invalid ES.GetInfo call which was causing Method not found errors\nDevice information is now obtained exclusively during discovery",
         "de": "Ungültiger ES.GetInfo-Aufruf entfernt, der Method not found-Fehler verursachte\nGeräteinformationen werden jetzt ausschließlich während der Erkennung abgerufen",
