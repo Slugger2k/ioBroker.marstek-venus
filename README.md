@@ -195,7 +195,7 @@ SOFTWARE.
 ## Changelog
 ### **WORK IN PROGRESS**
 - Added Venus A device support to adapter descriptions
-- Updated all documentation to include Venus A in supported devices list
+- Updated all documentation to include Venus A in the supported devices list
 - Fix: validate and sanitize all `setSettings` input values (type coercion, numeric range clamping, IP whitespace trim) to prevent security issues
 - Fix: use `indicator.connected` role for `info.connection` state instead of `indicator.reachable` per ioBroker spec
 - Fix: use specific `info.model`, `info.firmware`, `info.mac` roles for device info states instead of generic `text`

@@ -1509,13 +1509,73 @@ describe("MarstekVenusAdapter", function () {
 	});
 
 	describe("copyMethods helper", () => {
+		// Exact implementation from main.js for testing
+		function copyMethods(target, source) {
+			if (!source) {
+				return;
+			}
+			if (source.prototype && Object.getPrototypeOf(source.prototype)) {
+				// It's a class - copy from prototype
+				Object.defineProperties(target, Object.getOwnPropertyDescriptors(source.prototype));
+			} else {
+				// It's a plain object - copy directly
+				Object.assign(target, source);
+			}
+		}
+
 		it("handles null source gracefully", () => {
+			const target = {};
 			expect(() => {
-				const source = null;
-				if (!source) {
-					return;
-				}
+				copyMethods(target, null);
 			}).to.not.throw();
+			expect(target).to.deep.equal({});
+		});
+
+		it("handles undefined source gracefully", () => {
+			const target = {};
+			expect(() => {
+				copyMethods(target, undefined);
+			}).to.not.throw();
+			expect(target).to.deep.equal({});
+		});
+
+		it("copies properties from plain object source", () => {
+			const target = {};
+			const source = {
+				testProp: 123,
+				testMethod: () => 'hello'
+			};
+
+			copyMethods(target, source);
+
+			expect(target.testProp).to.equal(123);
+			expect(target.testMethod()).to.equal('hello');
+		});
+
+		it("copies methods from class prototype source", () => {
+			const target = {};
+			class TestClass {
+				testMethod() {
+					return 'from class';
+				}
+			}
+
+			copyMethods(target, TestClass);
+
+			expect(target.testMethod).to.be.a('function');
+			expect(target.testMethod()).to.equal('from class');
+		});
+
+		it("does not modify target when source is null", () => {
+			const target = { existing: 'value' };
+			copyMethods(target, null);
+			expect(target).to.deep.equal({ existing: 'value' });
+		});
+
+		it("does not modify target when source is undefined", () => {
+			const target = { existing: 'value' };
+			copyMethods(target, undefined);
+			expect(target).to.deep.equal({ existing: 'value' });
 		});
 	});
 
