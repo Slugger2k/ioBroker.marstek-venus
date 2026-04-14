@@ -27,6 +27,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 		this._slowPollTimer = null;
 		this._fastPollTimer = null;
 		this._discoveredIP = null;
+		this._discoveredDeviceModel = null;
 		this._pollingInProgress = false;
 		this._pollFailureCount = 0;
 
@@ -211,7 +212,10 @@ class MarstekVenusAdapter extends utils.Adapter {
 				if (response.result && response.result.ip) {
 					if (!this.config.ipAddress) {
 						this._discoveredIP = response.result.ip;
-						this.log.info(`Auto-selecting discovered device: ${this._discoveredIP}`);
+						this._discoveredDeviceModel = response.result.device;
+						this.log.info(
+							`Auto-selecting discovered device: ${this._discoveredIP} (${this._discoveredDeviceModel})`,
+						);
 						this.startPolling();
 						this.setState("info.device", { val: response.result.device, ack: true });
 						this.setState("info.firmware", { val: String(response.result.ver), ack: true });

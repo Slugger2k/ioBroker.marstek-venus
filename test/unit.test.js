@@ -761,6 +761,93 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
+	describe("Device model filtering", () => {
+		beforeEach(async () => {
+			adapter._normalPollTimer = null;
+			adapter._slowPollTimer = null;
+			adapter._pollingInProgress = false;
+			adapter._discoveredDeviceModel = null;
+		});
+
+		it("hasPVSupport returns true for VenusD", () => {
+			adapter._discoveredDeviceModel = "VenusD";
+			expect(adapter.hasPVSupport()).to.be.true;
+		});
+
+		it("hasPVSupport returns true for VenusA", () => {
+			adapter._discoveredDeviceModel = "VenusA";
+			expect(adapter.hasPVSupport()).to.be.true;
+		});
+
+		it("hasPVSupport returns false for VenusE", () => {
+			adapter._discoveredDeviceModel = "VenusE";
+			expect(adapter.hasPVSupport()).to.be.false;
+		});
+
+		it("hasPVSupport returns false for VenusC", () => {
+			adapter._discoveredDeviceModel = "VenusC";
+			expect(adapter.hasPVSupport()).to.be.false;
+		});
+
+		it("hasPVSupport returns true when no device model known", () => {
+			adapter._discoveredDeviceModel = null;
+			expect(adapter.hasPVSupport()).to.be.true;
+		});
+
+		it("skips PV polling for VenusE device", async () => {
+			adapter._discoveredDeviceModel = "VenusE";
+			adapter.pollESStatus = sandbox.stub().resolves();
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+
+			expect(adapter.pollPVStatus.called).to.be.false;
+			expect(adapter.pollESStatus.called).to.be.true;
+			expect(adapter.pollBatteryStatus.called).to.be.true;
+			expect(adapter.pollEMStatus.called).to.be.true;
+			expect(adapter.pollModeStatus.called).to.be.true;
+		});
+
+		it("calls PV polling for VenusD device", async () => {
+			adapter._discoveredDeviceModel = "VenusD";
+			adapter.pollESStatus = sandbox.stub().resolves();
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+
+			expect(adapter.pollPVStatus.called).to.be.true;
+			expect(adapter.pollESStatus.called).to.be.true;
+		});
+
+		it("updates device model from discovery response", () => {
+			adapter._discoveredIP = null;
+			adapter._discoveredDeviceModel = null;
+			adapter.config = { autoDiscovery: true, ipAddress: "" };
+
+			const discoveryResponse = {
+				id: 0,
+				src: "VenusE-24215ee580e7",
+				result: {
+					device: "VenusE",
+					ver: 111,
+					ble_mac: "24215ee580e7",
+					wifi_mac: "24215ee580e7",
+					ip: "192.168.177.55",
+				},
+			};
+
+			adapter.handleResponse(JSON.stringify(discoveryResponse), { address: "192.168.177.55", port: 30000 });
+
+			expect(adapter._discoveredDeviceModel).to.equal("VenusE");
+		});
+	});
+
 	describe("All helper methods", () => {
 		beforeEach(async () => {
 			await adapter.onReady();
