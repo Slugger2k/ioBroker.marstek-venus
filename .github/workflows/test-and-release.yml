@@ -29,8 +29,7 @@ jobs:
       - uses: ioBroker/testing-action-check@v1
         with:
           node-version: '24.x'
-          # Uncomment the following line if your adapter cannot be installed using 'npm ci'
-          # install-command: 'npm install'
+          install-command: 'npm install --legacy-peer-deps'
           lint: true
 
   # Runs adapter tests on all supported node versions and OSes
@@ -49,8 +48,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
-          # Uncomment the following line if your adapter cannot be installed using 'npm ci'
-          # install-command: 'npm install'
+          install-command: 'npm install --legacy-peer-deps'
 
   deploy:
     needs: [check-and-lint, adapter-tests]
