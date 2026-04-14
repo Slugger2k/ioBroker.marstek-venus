@@ -93,9 +93,9 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 |-----------|-------------|---------|
 | **ipAddress** | Leave empty for auto-discovery, or enter device IP | (empty) |
 | **udpPort** | UDP port for communication | 30000 |
-| **pollInterval** | Normal poll interval for all status values (ms) | 20000 |
-| **fastPollInterval** | Fast poll interval for power values (ms) | 5000 |
-| **requestTimeout** | Request timeout before retry (ms) | 3000 |
+| **pollInterval** | Normal poll interval for all status values (ms) | 30000 |
+| **fastPollInterval** | Fast poll interval for power values (ms) | 10000 |
+| **requestTimeout** | Request timeout before retry (ms) | 5000 |
 | **maxRetries** | Max retry attempts per request | 3 |
 | **autoDiscovery** | Enable automatic device discovery | true |
 
