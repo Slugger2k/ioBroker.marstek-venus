@@ -33,7 +33,7 @@ class MockAdapterBase {
 			warn: sinon.stub(),
 			error: sinon.stub(),
 		};
-		this.setStateAsync = sinon.stub().resolves();
+		this.setState = sinon.stub().resolves();
 		this.setStateChangedAsync = sinon.stub().resolves();
 		this.setObject = sinon.stub().resolves();
 		this.extendForeignObjectAsync = sinon.stub().resolves();
@@ -602,7 +602,7 @@ describe("MarstekVenusAdapter", function () {
 			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: true, ack: true })).to.be.true;
+			expect(adapter.setState.calledWith("info.connection", { val: true, ack: true })).to.be.true;
 			expect(adapter._pollFailureCount).to.equal(0);
 		});
 
@@ -626,7 +626,7 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter._pollFailureCount).to.equal(2);
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(3);
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: false, ack: true })).to.be.true;
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.true;
 		});
 
 		it("handles pollWithRetry returning false", async () => {
@@ -647,7 +647,7 @@ describe("MarstekVenusAdapter", function () {
 			});
 
 			await adapter.poll();
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: false, ack: true })).to.be.false;
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.false;
 			expect(adapter._pollFailureCount).to.equal(1);
 		});
 
@@ -663,15 +663,15 @@ describe("MarstekVenusAdapter", function () {
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(1);
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: false, ack: true })).to.be.false;
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.false;
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(2);
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: false, ack: true })).to.be.false;
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.false;
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(3);
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: false, ack: true })).to.be.true;
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.true;
 		});
 
 		it("resets failure count on successful poll after failures", async () => {
@@ -704,7 +704,7 @@ describe("MarstekVenusAdapter", function () {
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(0);
-			expect(adapter.setStateAsync.calledWith("info.connection", { val: true, ack: true })).to.be.true;
+			expect(adapter.setState.calledWith("info.connection", { val: true, ack: true })).to.be.true;
 		});
 
 		it("skips overlapping polls", async () => {

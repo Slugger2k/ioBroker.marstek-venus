@@ -213,9 +213,9 @@ class MarstekVenusAdapter extends utils.Adapter {
 						this._discoveredIP = response.result.ip;
 						this.log.info(`Auto-selecting discovered device: ${this._discoveredIP}`);
 						this.startPolling();
-						this.setStateAsync("info.device", { val: response.result.device, ack: true });
-						this.setStateAsync("info.firmware", { val: String(response.result.ver), ack: true });
-						this.setStateAsync("info.mac", {
+						this.setState("info.device", { val: response.result.device, ack: true });
+						this.setState("info.firmware", { val: String(response.result.ver), ack: true });
+						this.setState("info.mac", {
 							val: response.result.ble_mac || response.result.wifi_mac,
 							ack: true,
 						});
