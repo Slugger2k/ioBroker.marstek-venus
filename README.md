@@ -240,7 +240,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.14 (2026-04-14)
 - Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
 - refactor: replace `setStateAsync` with `setState` across codebase for consistency
 - chore: adjust polling and timeout configuration ranges in jsonConfig
