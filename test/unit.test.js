@@ -257,22 +257,22 @@ describe("MarstekVenusAdapter", function () {
 				adapter.config.autoDiscovery = false;
 				adapter.config.ipAddress = "192.168.1.50";
 				adapter.config.udpPort = 30000;
-				adapter.config.pollInterval = 10000;
+			adapter.config.pollInterval = 10000;
 
-				await adapter.onMessage({
-					command: "setSettings",
-					values: {
-						autoDiscovery: true,
-						ipAddress: "192.168.1.100",
-						udpPort: 30001,
-						pollInterval: 5000,
-					},
-				});
+			await adapter.onMessage({
+				command: "setSettings",
+				values: {
+					autoDiscovery: true,
+					ipAddress: "192.168.1.100",
+					udpPort: 30001,
+					pollInterval: 30000,
+				},
+			});
 
-				expect(adapter.config.autoDiscovery).to.be.true;
-				expect(adapter.config.ipAddress).to.equal("192.168.1.100");
-				expect(adapter.config.udpPort).to.equal(30001);
-				expect(adapter.config.pollInterval).to.equal(5000);
+			expect(adapter.config.autoDiscovery).to.be.true;
+			expect(adapter.config.ipAddress).to.equal("192.168.1.100");
+			expect(adapter.config.udpPort).to.equal(30001);
+			expect(adapter.config.pollInterval).to.equal(30000);
 				expect(adapter.log.info.calledWith("Settings saved and persisted")).to.be.true;
 			});
 		});

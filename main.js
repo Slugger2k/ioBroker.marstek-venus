@@ -123,7 +123,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 		this._pendingRequestsByMethod.set(method, PLACEHOLDER);
 
 		const maxRetries = this.config.maxRetries || 3;
-		const timeoutMs = this.config.requestTimeout || 3000;
+		const timeoutMs = this.config.requestTimeout || 5000;
 		const id = this._requestId++;
 		const request = { id, method, params };
 		const message = Buffer.from(JSON.stringify(request));
@@ -243,12 +243,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startFastPolling() {
-		this.log.info(`Starting fast polling loop (every ${this.config.fastPollInterval || 5000}ms)`);
+		this.log.info(`Starting fast polling loop (every ${this.config.fastPollInterval || 10000}ms)`);
 		if (this._fastPollTimer) {
 			this.clearInterval(this._fastPollTimer);
 			this._fastPollTimer = null;
 		}
-		this._fastPollTimer = this.setInterval(() => this.pollPower(), this.config.fastPollInterval || 5000);
+		this._fastPollTimer = this.setInterval(() => this.pollPower(), this.config.fastPollInterval || 10000);
 		this.pollPower();
 	}
 
@@ -256,12 +256,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startPolling() {
-		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 20000}ms)`);
+		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 30000}ms)`);
 		if (this._normalPollTimer) {
 			this.clearInterval(this._normalPollTimer);
 			this._normalPollTimer = null;
 		}
-		this._normalPollTimer = this.setInterval(() => this.poll(), this.config.pollInterval || 20000);
+		this._normalPollTimer = this.setInterval(() => this.poll(), this.config.pollInterval || 30000);
 		this.startFastPolling();
 		this.startSlowPolling();
 		this.poll();
@@ -303,7 +303,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 			this.config.autoDiscovery = !!settings.autoDiscovery;
 			this.config.ipAddress = typeof settings.ipAddress === "string" ? settings.ipAddress.trim() : "";
 			this.config.udpPort = Math.max(1, Math.min(65535, parseInt(settings.udpPort, 10) || 30000));
-			this.config.pollInterval = Math.max(500, Math.min(60000, parseInt(settings.pollInterval, 10) || 20000));
+			this.config.pollInterval = Math.max(20000, Math.min(120000, parseInt(settings.pollInterval, 10) || 30000));
 
 			await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
 				native: {
