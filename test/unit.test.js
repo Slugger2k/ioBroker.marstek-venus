@@ -350,10 +350,10 @@ describe("MarstekVenusAdapter", function () {
 			mockSocket.send.resetHistory();
 			const promise = adapter.sendRequest("ES.GetStatus");
 			clock.tick(1);
-			clock.tick(5000);
+			clock.tick(5001);
 			expect(mockSocket.send.callCount).to.equal(2);
-			clock.tick(5000);
-			clock.tick(5000);
+			clock.tick(5001);
+			clock.tick(5001);
 			try {
 				await promise;
 			} catch {
