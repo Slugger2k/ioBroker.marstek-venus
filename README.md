@@ -241,10 +241,10 @@ SOFTWARE.
 
 ## Changelog
 ### **WORK IN PROGRESS**
-- refactor: replace fragile mixin pattern (copyMethods runtime prototype patching) with explicit composition/delegation
+- refactor: replace fragile mixin pattern 
 - refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
 - fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
-- refactor: centralize poll interval magic numbers (35000/70000/600000ms) to lib/constants.js
+- refactor: centralize poll interval magic numbers 
 
 ### 0.1.14 (2026-04-14)
 - Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
