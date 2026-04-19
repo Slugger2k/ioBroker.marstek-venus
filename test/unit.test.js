@@ -198,7 +198,7 @@ describe("MarstekVenusAdapter", function () {
 			it("initializes states and creates socket", async () => {
 				await adapter.onReady();
 
-				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(38);
+				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(54);
 				expect(adapter.subscribeStatesAsync.calledWith("control.*")).to.be.true;
 				expect(dgram.createSocket.calledWith("udp4")).to.be.true;
 				expect(mockSocket.bind.called).to.be.true;
@@ -1046,42 +1046,68 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.log.warn.calledWithMatch(/pollPower failed/)).to.be.true;
 		});
 
-		it("pollPVStatus updates pv power, voltage and current", async () => {
+		it("pollPVStatus updates all PV states", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: 500,
-				pv_voltage: 220,
-				pv_current: 2.3,
+				pv1_power: 500,
+				pv1_voltage: 220,
+				pv1_current: 2.3,
+				pv1_state: 1,
+				pv2_power: 300,
+				pv2_voltage: 180,
+				pv2_current: 1.5,
+				pv2_state: 1,
+				pv3_power: 0,
+				pv3_voltage: 0,
+				pv3_current: 0,
+				pv3_state: 0,
+				pv4_power: 0,
+				pv4_voltage: 0,
+				pv4_current: 0,
+				pv4_state: 0,
 			});
 
 			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(3);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv", { val: 500, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.pvVoltage", { val: 220, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.pvCurrent", { val: 2.3, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.callCount).to.equal(16);
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 500, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Current", { val: 2.3, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv2", { val: 300, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv2Voltage", { val: 180, ack: true })).to.be.true;
 		});
 
-		it("pollPVStatus handles only voltage present", async () => {
+		it("pollPVStatus handles partial response with some PVs active", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: null,
-				pv_voltage: 220,
-				pv_current: null,
+				pv1_power: 500,
+				pv1_voltage: 220,
+				pv1_current: 2.3,
+				pv1_state: 1,
+				pv2_power: null,
+				pv2_voltage: null,
+				pv2_current: null,
+				pv2_state: null,
+				pv3_power: undefined,
+				pv3_voltage: undefined,
+				pv3_current: undefined,
+				pv3_state: undefined,
+				pv4_power: 0,
+				pv4_voltage: 0,
+				pv4_current: 0,
+				pv4_state: 0,
 			});
 
 			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(1);
-			expect(adapter.setStateChangedAsync.calledWith("power.pvVoltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.callCount).to.equal(8);
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 500, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
 		});
 
-		it("pollPVStatus handles only current present", async () => {
-			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: null,
-				pv_voltage: null,
-				pv_current: 2.3,
-			});
+		it("pollPVStatus handles empty response", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({});
 
 			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(1);
-			expect(adapter.setStateChangedAsync.calledWith("power.pvCurrent", { val: 2.3, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.callCount).to.equal(0);
 		});
 	});
 
