@@ -245,15 +245,6 @@ SOFTWARE.
 - refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
 - fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
 - refactor: centralize poll interval magic numbers (35000/70000/600000ms) to lib/constants.js
-- fix: add _slowPollingInProgress guard to prevent pollSlow() overlapping
-- refactor: add exponential backoff to pollWithRetry in polling.js (1000ms * 2^attempt)
-- fix: add recreateSocket() on UDP socket error for automatic recovery
-- fix: wrap _requestId with modulo (65535) to prevent integer overflow
-- fix: use snapshot [...pendingRequests.entries()] iteration in onUnload to avoid iterator issues
-- fix: remove silent catch in onUnload - log errors instead
-- fix: remove dead code in handleResponse after promise resolution
-- fix: restart polling timers after setSettings changes
-- fix: persist all config fields in setSettings (fastPollInterval, maxRetries, requestTimeout, deviceModel)
 
 ### 0.1.14 (2026-04-14)
 - Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
