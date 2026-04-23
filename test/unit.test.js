@@ -194,7 +194,7 @@ describe("MarstekVenusAdapter", function () {
 	});
 
 	describe("Lifecycle methods", () => {
-			describe("onReady()", () => {
+		describe("onReady()", () => {
 			it("initializes states and creates socket", async () => {
 				await adapter.onReady();
 
