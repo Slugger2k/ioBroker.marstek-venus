@@ -249,8 +249,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 				} else {
 					this.log.warn(`Received discovery response without IP address: ${JSON.stringify(response.result)}`);
 				}
+			} else if (response.error) {
+				const apiCode = response.error.code;
+				const apiMessage = response.error.message;
+				this.log.debug(`Received API error response (${apiCode}): ${apiMessage}`);
 			} else {
-				this.log.debug(`Received unsolicited message: ${response.method}`);
+				this.log.debug(`Received unsolicited message: ${JSON.stringify(response)}`);
 			}
 		} catch (e) {
 			this.log.debug(`Invalid response received: ${e.message}`);

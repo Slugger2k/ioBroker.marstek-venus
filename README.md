@@ -133,6 +133,9 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.control.manualWeekdays`** - Manual mode weekdays (1=Mon, 127=all) | number, rw
 - **`marstek-venus.0.control.manualPower`** - Manual mode power target in W | W, rw
 - **`marstek-venus.0.control.manualEnable`** - Enable manual mode schedule (true/false) | bool, rw
+- **`marstek-venus.0.control.dodValue`** - Set DOD value (30-88) | %, rw
+- **`marstek-venus.0.control.bleBroadcastEnabled`** - Enable BLE broadcast (true=enabled, false=disabled) | bool, rw
+- **`marstek-venus.0.control.ledState`** - Set panel LED state (true=on, false=off) | bool, rw
 
 ### Network States
 - **`marstek-venus.0.network.ip`** - Device IP address | ip, ro
@@ -176,7 +179,7 @@ Manual mode uses 10 time slots per day (0-9). Configure:
 
 ## API Implementation
 
-The adapter implements 100% of the official Marstek Open API Revision 1.0:
+Implemented Marstek Open API endpoints (Rev 2.0):
 
 - `Marstek.GetDevice` - Device discovery and information
 - `Wifi.GetStatus` - WiFi connection status
@@ -187,6 +190,13 @@ The adapter implements 100% of the official Marstek Open API Revision 1.0:
 - `ES.GetMode` - Current operating mode
 - `ES.SetMode` - Set operating mode and configuration
 - `EM.GetStatus` - Energy meter measurements
+- `DOD.SET` - Set DOD value
+- `Ble.Adv` - Control BLE broadcasting
+- `Led.Ctrl` - Control panel LED state
+
+Additional adapter extension (not listed in provided Rev 2.0 spec):
+
+- `Marstek.SetTargetPower` - Direct target power control
 
 ## Troubleshooting
 
@@ -242,6 +252,8 @@ SOFTWARE.
 ## Changelog
 ### **WORK IN PROGRESS**
 - verified timeout configuration values across all polling loops and request handling
+- fix discovery API request handling by sending only documented `Marstek.GetDevice` payload (`ble_mac: "0"`) and improving unmatched API error logging
+- implement missing Rev 2.0 writable endpoints: `DOD.SET`, `Ble.Adv`, and `Led.Ctrl`; update API implementation documentation
 
 ### 0.1.15 (2026-04-19)
 - refactor: replace fragile mixin pattern 

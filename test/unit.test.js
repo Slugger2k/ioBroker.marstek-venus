@@ -198,7 +198,7 @@ describe("MarstekVenusAdapter", function () {
 			it("initializes states and creates socket", async () => {
 				await adapter.onReady();
 
-				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(54);
+				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(57);
 				expect(adapter.subscribeStatesAsync.calledWith("control.*")).to.be.true;
 				expect(dgram.createSocket.calledWith("udp4")).to.be.true;
 				expect(mockSocket.bind.called).to.be.true;
@@ -475,6 +475,18 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.log.debug.calledWithMatch(/unsolicited message/)).to.be.true;
 		});
 
+		it("logs unmatched API error responses without treating them as unsolicited method", () => {
+			adapter.handleResponse(
+				Buffer.from(
+					JSON.stringify({ id: 0, src: "VenusA-abc", error: { code: -32602, message: "Invalid params" } }),
+				),
+				{ address: "192.168.1.100", port: 30000 },
+			);
+
+			expect(adapter.log.debug.calledWithMatch(/Received API error response \(-32602\): Invalid params/)).to.be
+				.true;
+		});
+
 		it("ignores invalid JSON", () => {
 			adapter.handleResponse(Buffer.from("invalid json"), { address: "192.168.1.100" });
 			expect(adapter.log.debug.calledWithMatch(/Invalid response/)).to.be.true;
@@ -584,6 +596,30 @@ describe("MarstekVenusAdapter", function () {
 					}),
 				),
 			).to.be.true;
+		});
+
+		it("handles DOD control state", async () => {
+			await adapter.onStateChange("control.dodValue", { val: 40, ack: false });
+
+			expect(adapter.sendRequest.calledWith("DOD.SET", { id: 0, value: 40 })).to.be.true;
+		});
+
+		it("clamps DOD control value to API range", async () => {
+			await adapter.onStateChange("control.dodValue", { val: 10, ack: false });
+
+			expect(adapter.sendRequest.calledWith("DOD.SET", { id: 0, value: 30 })).to.be.true;
+		});
+
+		it("handles BLE broadcast control state", async () => {
+			await adapter.onStateChange("control.bleBroadcastEnabled", { val: false, ack: false });
+
+			expect(adapter.sendRequest.calledWith("Ble.Adv", { id: 0, enable: 1 })).to.be.true;
+		});
+
+		it("handles LED control state", async () => {
+			await adapter.onStateChange("control.ledState", { val: true, ack: false });
+
+			expect(adapter.sendRequest.calledWith("Led.Ctrl", { id: 0, state: 1 })).to.be.true;
 		});
 	});
 
@@ -1350,13 +1386,16 @@ describe("MarstekVenusAdapter", function () {
 			sandbox.restore();
 		});
 
-		it("sends all 3 discovery attempts to broadcast and multicast", async () => {
+		it("sends one API-compliant discovery request to broadcast and multicast", async () => {
 			await adapter.discoverDevices();
-			expect(adapter._socket.send.callCount).to.equal(6);
-			// Verify broadcast (255.255.255.255) and multicast (239.255.255.250) are called for each attempt
+			expect(adapter._socket.send.callCount).to.equal(2);
+			// Verify broadcast (255.255.255.255) and multicast (239.255.255.250) are called for the single attempt
 			const calls = adapter._socket.send.getCalls();
-			// Each attempt: broadcast + multicast = 2 calls, 3 attempts = 6 total
-			expect(calls.length).to.equal(6);
+			expect(calls.length).to.equal(2);
+
+			const payload = JSON.parse(calls[0].args[0].toString());
+			expect(payload.method).to.equal("Marstek.GetDevice");
+			expect(payload.params).to.deep.equal({ ble_mac: "0" });
 		});
 
 		it("handles broadcast send errors gracefully", async () => {
