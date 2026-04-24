@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
@@ -29,6 +29,19 @@
       "zh-cn": "Marstek Venus A/C/D/E 储能设备适配器"
     },
     "news": {
+      "0.1.17": {
+        "en": "fix: correct PV1 power value scaling and update related unit tests",
+        "de": "fix: korrekte PV1-Leistungs-Skalierung und Aktualisierung der zugehörigen Gerätetests",
+        "ru": "исправление: правильное масштабирование значения мощности PV1 и обновление соответствующих модульных тестов",
+        "pt": "correção: correto PV1 valor de energia escalando e atualizar testes de unidade relacionados",
+        "nl": "fix: juiste PV1-vermogensschaal en update gerelateerde unittests",
+        "fr": "correction : correction de la valeur de puissance PV1 et mise à jour des essais unitaires",
+        "it": "corretto: corretto Ridimensionamento del valore di energia PV1 e test relativi all'unità di aggiornamento",
+        "es": "fijación: correcto cálculo del valor de potencia PV1 y actualización de las pruebas de unidad relacionadas",
+        "pl": "fix: prawidłowe skalowanie wartości mocy PV1 i uaktualnianie badań jednostkowych",
+        "uk": "виправити: виправлено значення PV1, масштабування та оновлення пов'язаних тестів",
+        "zh-cn": "固定:正确的PV1功率值缩放和更新相关的单位测试"
+      },
       "0.1.16": {
         "en": "fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method\nfix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout\nfeat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load",
         "de": "fix: Entfernen Sie doppelt ES. GetStatus-Anfragen – schnelle Umfrage und normale Umfrage rufen nicht mehr beide die gleiche API-Methode an\nfix: Entfernen Sie die interne Retry-Schleife von sendRequest, dass umgangene Rate-Limit-Schlange, wodurch ungedrosselte Anfrage Bursts auf Timeout\nfeat: konfigurierbare API-Endpunkte – jeder Wahlendpunkt (ES, Batterie, EM, Mode, PV, Wifi, BLE) kann in der Admin-Konfiguration UI aktiviert/deaktiviert werden, um die Gerätelast zu reduzieren",
@@ -106,19 +119,6 @@
         "pl": "Poprawiono pole autora w package.json z obiektu na ciąg znaków\nUsunięto puste supportedMessages z io-package.json\nUsunięto duplikowanie tworzenia kanałów z initStates()\nUsunięto zbędne dziedziczenie prototypu Object.assign\nPrzekazano instancję adaptera do _requestQueue.clear() podczas wyładowywania\nPoprawiono rolę control.mode z switch.mode na value\nPoprawiono role power.pvVoltage i power.pvCurrent na value.voltage/value.current\nPoprawiono rolę energymeter.ctState i dodano mapę stanów\nPoprawiono rolę network.rssi z value.signal na value\nPoprawiono rolę info.firmware z value na text\nDodano pola loglevel i readme do sekcji common io-package.json\nDodano enabled: false do sekcji common io-package.json\nPoprawiono setSettings: użycie extendForeignObjectAsync z dynamiczną przestrzenią nazw\nPoprawiono rolę info.connection: użycie indicator.reachable dla stanu połączenia urządzenia",
         "uk": "Виправлено поле автора в package.json з об'єкта на рядок\nВидалено порожні supportedMessages з io-package.json\nВидалено дублювання створення каналів з initStates()\nВидалено зайве успадкування прототипу Object.assign\nПередано екземпляр адаптера в _requestQueue.clear() при вивантаженні\nВиправлено роль control.mode з switch.mode на value\nВиправлено ролі power.pvVoltage та power.pvCurrent на value.voltage/value.current\nВиправлено роль energymeter.ctState та додано карту станів\nВиправлено роль network.rssi з value.signal на value\nВиправлено роль info.firmware з value на text\nДодано поля loglevel та readme до секції common io-package.json\nДодано enabled: false до секції common io-package.json\nВиправлено setSettings: використано extendForeignObjectAsync з динамічним простором імен\nВиправлено роль info.connection: використано indicator.reachable для статусу підключення пристрою",
         "zh-cn": "修复 package.json 中的 author 字段从对象改为字符串\n从 io-package.json 中移除空的 supportedMessages\n从 initStates() 中移除重复的通道创建\n移除冗余的 Object.assign 原型继承\n卸载时将适配器实例传递给 _requestQueue.clear()\n修复 control.mode 角色从 switch.mode 改为 value\n修复 power.pvVoltage 和 power.pvCurrent 角色为 value.voltage/value.current\n修复 energymeter.ctState 角色并添加状态映射\n修复 network.rssi 角色从 value.signal 改为 value\n修复 info.firmware 角色从 value 改为 text\n在 io-package.json common 中添加 loglevel 和 readme 字段\n在 io-package.json common 中添加 enabled: false\n修复 setSettings: 使用带动态命名空间的 extendForeignObjectAsync\n修复 info.connection 角色: 使用 indicator.reachable 作为设备连接状态"
-      },
-      "0.1.9": {
-        "en": "fix adapter checker issues",
-        "de": "fix adapter checker probleme",
-        "ru": "исправить проблемы проверки адаптера",
-        "pt": "corrigir problemas de verificação do adaptador",
-        "nl": "adaptercontroleproblemen oplossen",
-        "fr": "correction des problèmes de vérification de l'adaptateur",
-        "it": "risolvere i problemi dell'adattatore checker",
-        "es": "solucionar problemas de control de adaptador",
-        "pl": "problemy z sprawdzaniem adaptera",
-        "uk": "виправити проблеми перевірки адаптера",
-        "zh-cn": "固定适配器检查器问题"
       }
     },
     "icon": "marstek-venus.png",
