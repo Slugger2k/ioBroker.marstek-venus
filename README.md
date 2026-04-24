@@ -255,7 +255,7 @@ SOFTWARE.
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
 - feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
 - implement missing Rev 2.0 writable endpoints: `DOD.SET`, `Ble.Adv`, and `Led.Ctrl`; update API implementation documentation
-- fix `ES.SetMode` mode normalization by supporting `Ups`/`UPS` mapping and rejecting unsupported mode values before sending
+
 
 ### 0.1.15 (2026-04-19)
 - refactor: replace fragile mixin pattern 
