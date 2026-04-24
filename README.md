@@ -250,6 +250,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+
 ### 0.1.16 (2026-04-24)
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout

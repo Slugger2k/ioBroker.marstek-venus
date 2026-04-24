@@ -1235,7 +1235,7 @@ describe("MarstekVenusAdapter", function () {
 
 			await adapter.pollPVStatus();
 			expect(adapter.setStateChangedAsync.callCount).to.equal(16);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 500, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 50, ack: true })).to.be.true;
 			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
 			expect(adapter.setStateChangedAsync.calledWith("power.pv1Current", { val: 2.3, ack: true })).to.be.true;
 			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
@@ -1265,7 +1265,7 @@ describe("MarstekVenusAdapter", function () {
 
 			await adapter.pollPVStatus();
 			expect(adapter.setStateChangedAsync.callCount).to.equal(8);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 500, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 50, ack: true })).to.be.true;
 			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
 			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
 		});
