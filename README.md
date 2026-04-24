@@ -251,7 +251,7 @@ SOFTWARE.
 
 ## Changelog
 ### **WORK IN PROGRESS**
-
+- fix: correct PV1 power value scaling and update related unit tests
 
 ### 0.1.16 (2026-04-24)
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
