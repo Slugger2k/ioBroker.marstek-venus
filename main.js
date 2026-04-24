@@ -160,6 +160,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 					this._pendingRequests.set(id, { resolve, reject, timeout, method });
 
 					this.log.debug(`Sending ${method} to ${targetIP}:${this.config.udpPort}`);
+					this.log.silly(`Request: ${message.toString()}`);
 					this._socket.send(message, 0, message.length, this.config.udpPort, targetIP, err => {
 						if (err) {
 							this.clearTimeout(timeout);
@@ -209,6 +210,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	handleResponse(msgBuffer, rinfo) {
 		try {
+			this.log.silly(`Response from ${rinfo.address}:${rinfo.port}: ${msgBuffer.toString()}`);
 			const response = JSON.parse(msgBuffer.toString());
 			this.log.debug(`Received response from ${rinfo.address}:${rinfo.port}: ${JSON.stringify(response)}`);
 

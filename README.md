@@ -253,13 +253,7 @@ SOFTWARE.
 ### **WORK IN PROGRESS**
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
-- fix: PENDING_SYMBOL race condition in request dedup that caused silent data loss
-- fix: reduce retry amplification — single retry layer (pollWithRetry) instead of two stacked layers
-- feat: add sendRequestWithRetry for control/write commands to preserve reliability for user actions
-- feat: pollESStatus now tracks connection state (info.connection) from the fast poll tier
 - feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
-- verified timeout configuration values across all polling loops and request handling
-- fix discovery API request handling by sending only documented `Marstek.GetDevice` payload (`ble_mac: "0"`) and improving unmatched API error logging
 - implement missing Rev 2.0 writable endpoints: `DOD.SET`, `Ble.Adv`, and `Led.Ctrl`; update API implementation documentation
 - fix `ES.SetMode` mode normalization by supporting `Ups`/`UPS` mapping and rejecting unsupported mode values before sending
 
