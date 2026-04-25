@@ -111,8 +111,6 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 
 ### Power States
 - **`marstek-venus.0.power.pv`** - PV power generation in W | W, ro
-- **`marstek-venus.0.power.pvVoltage`** - PV voltage in V | V, ro
-- **`marstek-venus.0.power.pvCurrent`** - PV current in A | A, ro
 - **`marstek-venus.0.power.grid`** - Grid power flow (positive=import, negative=export) | W, ro
 - **`marstek-venus.0.power.battery`** - Battery power flow in W | W, ro
 - **`marstek-venus.0.power.load`** - Load consumption in W | W, ro
