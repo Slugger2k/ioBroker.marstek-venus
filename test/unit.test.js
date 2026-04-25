@@ -1146,6 +1146,17 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.setStateChangedAsync.calledWith("control.mode", { val: "AI", ack: true })).to.be.true;
 		});
 
+		it("pollModeStatus updates power states", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({
+				ongrid_power: 123,
+				offgrid_power: 456
+			});
+
+			await adapter.pollModeStatus();
+			expect(adapter.setStateChangedAsync.calledWith("power.grid", { val: 123, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.load", { val: 456, ack: true })).to.be.true;
+		});
+
 		it("pollModeStatus handles null mode", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({});
 
