@@ -248,6 +248,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
+- test: update unit tests to match reduced `setObjectNotExistsAsync` call count after removing unused PV states
+- docs: add ESLint, i18n translation, and JSONConfig admin-UI setup instructions to AGENTS.md
+- chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
+
 ### 0.1.17 (2026-04-24)
 - fix: correct PV1 power value scaling and update related unit tests
 
