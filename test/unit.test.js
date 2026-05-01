@@ -1150,6 +1150,7 @@ describe("MarstekVenusAdapter", function () {
 			adapter.sendRequest = sandbox.stub().resolves({
 				ongrid_power: 123,
 				offgrid_power: 456,
+				bat_soc: 42,
 			});
 
 			await adapter.pollModeStatus();
@@ -1160,6 +1161,8 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerA", sinon.match.any)).to.be.false;
 			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerB", sinon.match.any)).to.be.false;
 			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerC", sinon.match.any)).to.be.false;
+
+			expect(adapter.setStateChangedAsync.calledWith("battery.soc", { val: 42, ack: true })).to.be.true;
 		});
 
 		it("pollModeStatus does not update phase states if no CT is connected", async () => {
