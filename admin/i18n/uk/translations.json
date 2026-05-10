@@ -7,5 +7,14 @@
     "maxRetries": "Макс. повторних спроб",
     "pollInterval": "Інтервал опитування",
     "requestTimeout": "Час очікування запиту",
-    "udpPort": "Порт UDP"
+    "udpPort": "Порт UDP",
+    "endpointHeader": "Кінцеві точки API",
+    "endpointInfo": "Оберіть, які кінцеві точки API має опитувати адаптер. Вимкнення невикористовуваних кінцевих точок зменшує навантаження на пристрій.",
+    "enableESStatus": "ES.GetStatus (Потужність, Енергія, SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (Деталі батареї)",
+    "enableEMStatus": "EM.GetStatus (Лічильник енергії)",
+    "enableModeStatus": "ES.GetMode (Режим роботи)",
+    "enablePVStatus": "PV.GetStatus (Сонячні панелі)",
+    "enableWifiStatus": "Wifi.GetStatus (Мережева інформація)",
+    "enableBLEStatus": "BLE.GetStatus (Статус Bluetooth)"
 }

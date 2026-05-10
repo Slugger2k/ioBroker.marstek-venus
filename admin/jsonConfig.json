@@ -45,7 +45,7 @@
       "label": "pollInterval",
       "min": 20000,
       "max": 120000,
-      "default": 30000,
+      "default": 70000,
       "xs": 12,
       "sm": 6,
       "md": 6,
@@ -57,8 +57,8 @@
       "type": "number",
       "label": "fastPollInterval",
       "min": 5000,
-      "max": 30000,
-      "default": 10000,
+      "max": 60000,
+      "default": 30000,
       "xs": 12,
       "sm": 6,
       "md": 6,
@@ -69,26 +69,14 @@
       "type": "number",
       "label": "requestTimeout",
       "min": 1000,
-      "max": 30000,
-      "default": 5000,
+      "max": 60000,
+      "default": 7000,
       "xs": 12,
       "sm": 6,
       "md": 6,
       "lg": 4,
       "xl": 3,
       "newLine": true
-    },
-    "maxRetries": {
-      "type": "number",
-      "label": "maxRetries",
-      "min": 0,
-      "max": 10,
-      "default": 3,
-      "xs": 12,
-      "sm": 6,
-      "md": 6,
-      "lg": 4,
-      "xl": 3
     },
     "autoDiscovery": {
       "type": "checkbox",
@@ -99,6 +87,95 @@
       "md": 12,
       "lg": 12,
       "xl": 12,
+      "newLine": true
+    },
+    "_endpointHeader": {
+      "type": "header",
+      "text": "endpointHeader",
+      "size": 3,
+      "newLine": true
+    },
+    "_endpointInfo": {
+      "type": "staticText",
+      "label": "endpointInfo",
+      "newLine": true,
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12
+    },
+    "enableESStatus": {
+      "type": "checkbox",
+      "label": "enableESStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3,
+      "newLine": true
+    },
+    "enableBatteryStatus": {
+      "type": "checkbox",
+      "label": "enableBatteryStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3
+    },
+    "enableEMStatus": {
+      "type": "checkbox",
+      "label": "enableEMStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3
+    },
+    "enableModeStatus": {
+      "type": "checkbox",
+      "label": "enableModeStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3,
+      "newLine": true
+    },
+    "enablePVStatus": {
+      "type": "checkbox",
+      "label": "enablePVStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3
+    },
+    "enableWifiStatus": {
+      "type": "checkbox",
+      "label": "enableWifiStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3
+    },
+    "enableBLEStatus": {
+      "type": "checkbox",
+      "label": "enableBLEStatus",
+      "default": true,
+      "xs": 12,
+      "sm": 6,
+      "md": 4,
+      "lg": 4,
+      "xl": 3,
       "newLine": true
     }
   }

@@ -45,3 +45,7 @@ All changelog entries prior to the current version are stored here.
 
 ### 0.1.5 (2026-04-11)
 - Initial release with full Marstek Venus Open API support
+## 0.1.12 (2026-04-12)
+- new release
+
+> Older changelog entries are available in [CHANGELOG_OLD.md](./CHANGELOG_OLD.md)

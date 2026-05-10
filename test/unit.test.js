@@ -32,6 +32,7 @@ class MockAdapterBase {
 			debug: sinon.stub(),
 			warn: sinon.stub(),
 			error: sinon.stub(),
+			silly: sinon.stub(),
 		};
 		this.setState = sinon.stub().resolves();
 		this.setStateChangedAsync = sinon.stub().resolves();
@@ -198,7 +199,7 @@ describe("MarstekVenusAdapter", function () {
 			it("initializes states and creates socket", async () => {
 				await adapter.onReady();
 
-				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(38);
+				expect(adapter.setObjectNotExistsAsync.callCount).to.equal(55);
 				expect(adapter.subscribeStatesAsync.calledWith("control.*")).to.be.true;
 				expect(dgram.createSocket.calledWith("udp4")).to.be.true;
 				expect(mockSocket.bind.called).to.be.true;
@@ -265,14 +266,14 @@ describe("MarstekVenusAdapter", function () {
 						autoDiscovery: true,
 						ipAddress: "192.168.1.100",
 						udpPort: 30001,
-						pollInterval: 30000,
+						pollInterval: 70000,
 					},
 				});
 
 				expect(adapter.config.autoDiscovery).to.be.true;
 				expect(adapter.config.ipAddress).to.equal("192.168.1.100");
 				expect(adapter.config.udpPort).to.equal(30001);
-				expect(adapter.config.pollInterval).to.equal(30000);
+				expect(adapter.config.pollInterval).to.equal(70000);
 				expect(adapter.log.info.calledWith("Settings saved and persisted")).to.be.true;
 			});
 		});
@@ -328,7 +329,6 @@ describe("MarstekVenusAdapter", function () {
 			adapter._requestQueue._shuttingDown = false;
 			adapter._requestQueue.queue = [];
 			adapter._requestQueue._busy = false;
-			adapter.config.maxRetries = 1;
 			const promise = adapter.sendRequest("ES.GetStatus");
 			clock.tick(1);
 			clock.tick(10000);
@@ -337,23 +337,21 @@ describe("MarstekVenusAdapter", function () {
 				await promise;
 				expect.fail("Should timeout");
 			} catch (e) {
-				expect(e.message).to.include("1 attempts");
+				expect(e.message).to.include("timed out");
 			}
 		});
 
-		it("retries request on timeout", async () => {
+		it("does not retry internally on timeout", async () => {
 			adapter._requestQueue._shuttingDown = false;
 			adapter._requestQueue.queue = [];
 			adapter._requestQueue._busy = false;
-			adapter.config.maxRetries = 3;
 			adapter.config.requestTimeout = 5000;
 			mockSocket.send.resetHistory();
 			const promise = adapter.sendRequest("ES.GetStatus");
 			clock.tick(1);
-			clock.tick(5000);
-			expect(mockSocket.send.callCount).to.equal(2);
-			clock.tick(5000);
-			clock.tick(5000);
+			clock.tick(5001);
+			// Single attempt only — no internal retries
+			expect(mockSocket.send.callCount).to.equal(1);
 			try {
 				await promise;
 			} catch {
@@ -475,6 +473,18 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.log.debug.calledWithMatch(/unsolicited message/)).to.be.true;
 		});
 
+		it("logs unmatched API error responses without treating them as unsolicited method", () => {
+			adapter.handleResponse(
+				Buffer.from(
+					JSON.stringify({ id: 0, src: "VenusA-abc", error: { code: -32602, message: "Invalid params" } }),
+				),
+				{ address: "192.168.1.100", port: 30000 },
+			);
+
+			expect(adapter.log.debug.calledWithMatch(/Received API error response \(-32602\): Invalid params/)).to.be
+				.true;
+		});
+
 		it("ignores invalid JSON", () => {
 			adapter.handleResponse(Buffer.from("invalid json"), { address: "192.168.1.100" });
 			expect(adapter.log.debug.calledWithMatch(/Invalid response/)).to.be.true;
@@ -585,6 +595,56 @@ describe("MarstekVenusAdapter", function () {
 				),
 			).to.be.true;
 		});
+
+		it("handles Ups mode using ups_cfg", async () => {
+			await adapter.onStateChange("control.mode", { val: "Ups", ack: false });
+
+			expect(
+				adapter.sendRequest.calledWith(
+					"ES.SetMode",
+					sinon.match({
+						config: { mode: "Ups", ups_cfg: { enable: 1 } },
+					}),
+				),
+			).to.be.true;
+		});
+
+		it("normalizes UPS mode to Ups", async () => {
+			await adapter.onStateChange("control.mode", { val: "UPS", ack: false });
+
+			expect(
+				adapter.sendRequest.calledWith(
+					"ES.SetMode",
+					sinon.match({
+						config: { mode: "Ups", ups_cfg: { enable: 1 } },
+					}),
+				),
+			).to.be.true;
+		});
+
+		it("handles DOD control state", async () => {
+			await adapter.onStateChange("control.dodValue", { val: 40, ack: false });
+
+			expect(adapter.sendRequest.calledWith("DOD.SET", { id: 0, value: 40 })).to.be.true;
+		});
+
+		it("clamps DOD control value to API range", async () => {
+			await adapter.onStateChange("control.dodValue", { val: 10, ack: false });
+
+			expect(adapter.sendRequest.calledWith("DOD.SET", { id: 0, value: 30 })).to.be.true;
+		});
+
+		it("handles BLE broadcast control state", async () => {
+			await adapter.onStateChange("control.bleBroadcastEnabled", { val: false, ack: false });
+
+			expect(adapter.sendRequest.calledWith("Ble.Adv", { id: 0, enable: 1 })).to.be.true;
+		});
+
+		it("handles LED control state", async () => {
+			await adapter.onStateChange("control.ledState", { val: true, ack: false });
+
+			expect(adapter.sendRequest.calledWith("Led.Ctrl", { id: 0, state: 1 })).to.be.true;
+		});
 	});
 
 	describe("Poll functions", () => {
@@ -595,7 +655,6 @@ describe("MarstekVenusAdapter", function () {
 		});
 
 		it("updates connection state on successful poll", async () => {
-			adapter.pollESStatus = sandbox.stub().resolves();
 			adapter.pollBatteryStatus = sandbox.stub().resolves();
 			adapter.pollPVStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
@@ -685,7 +744,6 @@ describe("MarstekVenusAdapter", function () {
 			});
 
 			// First two polls fail (all poll functions fail)
-			adapter.pollESStatus = sandbox.stub().rejects(new Error("Failed"));
 			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Failed"));
 			adapter.pollPVStatus = sandbox.stub().rejects(new Error("Failed"));
 			adapter.pollEMStatus = sandbox.stub().rejects(new Error("Failed"));
@@ -696,7 +754,6 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter._pollFailureCount).to.equal(2);
 
 			// Third poll succeeds
-			adapter.pollESStatus = sandbox.stub().resolves();
 			adapter.pollBatteryStatus = sandbox.stub().resolves();
 			adapter.pollPVStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
@@ -721,14 +778,13 @@ describe("MarstekVenusAdapter", function () {
 			});
 
 			let attempts = 0;
-			adapter.pollESStatus = sandbox.stub().callsFake(() => {
+			adapter.pollBatteryStatus = sandbox.stub().callsFake(() => {
 				attempts++;
 				if (attempts < 2) {
 					return Promise.reject(new Error("Transient failure"));
 				}
 				return Promise.resolve();
 			});
-			adapter.pollBatteryStatus = sandbox.stub().resolves();
 			adapter.pollPVStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
 			adapter.pollModeStatus = sandbox.stub().resolves();
@@ -761,6 +817,127 @@ describe("MarstekVenusAdapter", function () {
 		});
 	});
 
+	describe("Endpoint config filtering", () => {
+		beforeEach(async () => {
+			adapter._normalPollTimer = null;
+			adapter._slowPollTimer = null;
+			adapter._pollingInProgress = false;
+			adapter._slowPollingInProgress = false;
+			adapter._pollFailureCount = 0;
+		});
+
+		it("skips battery polling when enableBatteryStatus is false", async () => {
+			adapter.config.enableBatteryStatus = false;
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+			expect(adapter.pollBatteryStatus.called).to.be.false;
+			expect(adapter.pollEMStatus.called).to.be.true;
+		});
+
+		it("skips EM polling when enableEMStatus is false", async () => {
+			adapter.config.enableEMStatus = false;
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+			expect(adapter.pollEMStatus.called).to.be.false;
+			expect(adapter.pollBatteryStatus.called).to.be.true;
+		});
+
+		it("skips mode polling when enableModeStatus is false", async () => {
+			adapter.config.enableModeStatus = false;
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+			expect(adapter.pollModeStatus.called).to.be.false;
+		});
+
+		it("skips PV polling when enablePVStatus is false", async () => {
+			adapter.config.enablePVStatus = false;
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+			expect(adapter.pollPVStatus.called).to.be.false;
+		});
+
+		it("skips PV polling when enabled but device has no PV support", async () => {
+			adapter.config.enablePVStatus = true;
+			adapter._discoveredDeviceModel = "VenusC";
+			adapter.pollBatteryStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
+			adapter.pollPVStatus = sandbox.stub().resolves();
+
+			await adapter.poll();
+			expect(adapter.pollPVStatus.called).to.be.false;
+		});
+
+		it("returns early when all normal endpoints disabled", async () => {
+			adapter.config.enableBatteryStatus = false;
+			adapter.config.enableEMStatus = false;
+			adapter.config.enableModeStatus = false;
+			adapter.config.enablePVStatus = false;
+
+			await adapter.poll();
+			expect(adapter.setState.calledWith("info.connection")).to.be.false;
+			expect(adapter._pollFailureCount).to.equal(0);
+		});
+
+		it("skips wifi polling when enableWifiStatus is false", async () => {
+			adapter.config.enableWifiStatus = false;
+			adapter.pollWifiStatus = sandbox.stub().resolves();
+			adapter.pollBLEStatus = sandbox.stub().resolves();
+
+			await adapter.pollSlow();
+			expect(adapter.pollWifiStatus.called).to.be.false;
+			expect(adapter.pollBLEStatus.called).to.be.true;
+		});
+
+		it("skips BLE polling when enableBLEStatus is false", async () => {
+			adapter.config.enableBLEStatus = false;
+			adapter.pollWifiStatus = sandbox.stub().resolves();
+			adapter.pollBLEStatus = sandbox.stub().resolves();
+
+			await adapter.pollSlow();
+			expect(adapter.pollBLEStatus.called).to.be.false;
+			expect(adapter.pollWifiStatus.called).to.be.true;
+		});
+
+		it("does not start fast poll timer when enableESStatus is false", () => {
+			adapter.config.enableESStatus = false;
+			adapter.startFastPolling();
+			expect(adapter._fastPollTimer).to.be.null;
+		});
+
+		it("does not start slow poll timer when both wifi and BLE disabled", () => {
+			adapter.config.enableWifiStatus = false;
+			adapter.config.enableBLEStatus = false;
+			adapter.startSlowPolling();
+			expect(adapter._slowPollTimer).to.be.null;
+		});
+
+		it("starts slow poll timer when only wifi is enabled", () => {
+			adapter.config.enableWifiStatus = true;
+			adapter.config.enableBLEStatus = false;
+			adapter.pollWifiStatus = sandbox.stub().resolves();
+			adapter.pollBLEStatus = sandbox.stub().resolves();
+			adapter.startSlowPolling();
+			expect(adapter._slowPollTimer).to.not.be.null;
+		});
+	});
+
 	describe("Device model filtering", () => {
 		beforeEach(async () => {
 			adapter._normalPollTimer = null;
@@ -789,6 +966,26 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.hasPVSupport()).to.be.false;
 		});
 
+		it("hasPVSupport returns true for VenusD 3.0", () => {
+			adapter._discoveredDeviceModel = "VenusD 3.0";
+			expect(adapter.hasPVSupport()).to.be.true;
+		});
+
+		it("hasPVSupport returns true for VenusA 3.0", () => {
+			adapter._discoveredDeviceModel = "VenusA 3.0";
+			expect(adapter.hasPVSupport()).to.be.true;
+		});
+
+		it("hasPVSupport returns false for VenusE 3.0", () => {
+			adapter._discoveredDeviceModel = "VenusE 3.0";
+			expect(adapter.hasPVSupport()).to.be.false;
+		});
+
+		it("hasPVSupport returns false for VenusC 3.0", () => {
+			adapter._discoveredDeviceModel = "VenusC 3.0";
+			expect(adapter.hasPVSupport()).to.be.false;
+		});
+
 		it("hasPVSupport returns true when no device model known", () => {
 			adapter._discoveredDeviceModel = null;
 			expect(adapter.hasPVSupport()).to.be.true;
@@ -796,7 +993,6 @@ describe("MarstekVenusAdapter", function () {
 
 		it("skips PV polling for VenusE device", async () => {
 			adapter._discoveredDeviceModel = "VenusE";
-			adapter.pollESStatus = sandbox.stub().resolves();
 			adapter.pollBatteryStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
 			adapter.pollModeStatus = sandbox.stub().resolves();
@@ -805,7 +1001,6 @@ describe("MarstekVenusAdapter", function () {
 			await adapter.poll();
 
 			expect(adapter.pollPVStatus.called).to.be.false;
-			expect(adapter.pollESStatus.called).to.be.true;
 			expect(adapter.pollBatteryStatus.called).to.be.true;
 			expect(adapter.pollEMStatus.called).to.be.true;
 			expect(adapter.pollModeStatus.called).to.be.true;
@@ -813,7 +1008,6 @@ describe("MarstekVenusAdapter", function () {
 
 		it("calls PV polling for VenusD device", async () => {
 			adapter._discoveredDeviceModel = "VenusD";
-			adapter.pollESStatus = sandbox.stub().resolves();
 			adapter.pollBatteryStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
 			adapter.pollModeStatus = sandbox.stub().resolves();
@@ -822,7 +1016,6 @@ describe("MarstekVenusAdapter", function () {
 			await adapter.poll();
 
 			expect(adapter.pollPVStatus.called).to.be.true;
-			expect(adapter.pollESStatus.called).to.be.true;
 		});
 
 		it("updates device model from discovery response", () => {
@@ -953,6 +1146,52 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.setStateChangedAsync.calledWith("control.mode", { val: "AI", ack: true })).to.be.true;
 		});
 
+		it("pollModeStatus updates power states", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({
+				ongrid_power: 123,
+				offgrid_power: 456,
+				bat_soc: 42,
+			});
+
+			await adapter.pollModeStatus();
+
+			expect(adapter.setStateChangedAsync.calledWith("power.grid", { val: 123, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.load", { val: 456, ack: true })).to.be.true;
+
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerA", sinon.match.any)).to.be.false;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerB", sinon.match.any)).to.be.false;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerC", sinon.match.any)).to.be.false;
+
+			expect(adapter.setStateChangedAsync.calledWith("battery.soc", { val: 42, ack: true })).to.be.true;
+		});
+
+		it("pollModeStatus does not update phase states if no CT is connected", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({
+				ct_state: 0,
+			});
+
+			await adapter.pollModeStatus();
+
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerA", sinon.match.any)).to.be.false;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerB", sinon.match.any)).to.be.false;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerC", sinon.match.any)).to.be.false;
+		});
+
+		it("pollModeStatus updates phase states if CT is connected", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({
+				ct_state: 1,
+				a_power: 1,
+				b_power: 2,
+				c_power: 3,
+			});
+
+			await adapter.pollModeStatus();
+
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerA", { val: 1, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerB", { val: 2, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("energymeter.powerC", { val: 3, ack: true })).to.be.true;
+		});
+
 		it("pollModeStatus handles null mode", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({});
 
@@ -989,7 +1228,16 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.log.warn.calledWithMatch(/BLE.GetStatus failed/)).to.be.true;
 		});
 
-		it("pollPower updates all power states", async () => {
+		it("pollESStatus handles errors gracefully and tracks connection", async () => {
+			adapter.sendRequest = sandbox.stub().rejects(new Error("ES error"));
+
+			await adapter.pollESStatus();
+			expect(adapter.log.warn.calledWithMatch(/ES.GetStatus failed/)).to.be.true;
+			expect(adapter._pollFailureCount).to.equal(1);
+		});
+
+		it("pollESStatus resets failure count on success", async () => {
+			adapter._pollFailureCount = 2;
 			adapter.sendRequest = sandbox.stub().resolves({
 				pv_power: 500,
 				ongrid_power: 200,
@@ -997,71 +1245,82 @@ describe("MarstekVenusAdapter", function () {
 				offgrid_power: 150,
 			});
 
-			await adapter.pollPower();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(4);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv", { val: 500, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.grid", { val: 200, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.battery", { val: -100, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.load", { val: 150, ack: true })).to.be.true;
+			await adapter.pollESStatus();
+			expect(adapter._pollFailureCount).to.equal(0);
+			expect(adapter.setState.calledWith("info.connection", { val: true, ack: true })).to.be.true;
 		});
 
-		it("pollPower handles partial response with some null values", async () => {
+		it("pollESStatus marks disconnected after 3 failures", async () => {
+			adapter._pollFailureCount = 2;
+			adapter.sendRequest = sandbox.stub().rejects(new Error("ES error"));
+
+			await adapter.pollESStatus();
+			expect(adapter._pollFailureCount).to.equal(3);
+			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.true;
+		});
+
+		it("pollPVStatus updates all PV states", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: 500,
-				ongrid_power: null,
-				bat_power: undefined,
-				offgrid_power: 150,
-			});
-
-			await adapter.pollPower();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(2);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv", { val: 500, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.load", { val: 150, ack: true })).to.be.true;
-		});
-
-		it("pollPower handles errors gracefully", async () => {
-			adapter.sendRequest = sandbox.stub().rejects(new Error("Power error"));
-
-			await adapter.pollPower();
-			expect(adapter.log.warn.calledWithMatch(/pollPower failed/)).to.be.true;
-		});
-
-		it("pollPVStatus updates pv power, voltage and current", async () => {
-			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: 500,
-				pv_voltage: 220,
-				pv_current: 2.3,
-			});
-
-			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(3);
-			expect(adapter.setStateChangedAsync.calledWith("power.pv", { val: 500, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.pvVoltage", { val: 220, ack: true })).to.be.true;
-			expect(adapter.setStateChangedAsync.calledWith("power.pvCurrent", { val: 2.3, ack: true })).to.be.true;
-		});
-
-		it("pollPVStatus handles only voltage present", async () => {
-			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: null,
-				pv_voltage: 220,
-				pv_current: null,
+				pv1_power: 500,
+				pv1_voltage: 220,
+				pv1_current: 2.3,
+				pv1_state: 1,
+				pv2_power: 300,
+				pv2_voltage: 180,
+				pv2_current: 1.5,
+				pv2_state: 1,
+				pv3_power: 0,
+				pv3_voltage: 0,
+				pv3_current: 0,
+				pv3_state: 0,
+				pv4_power: 0,
+				pv4_voltage: 0,
+				pv4_current: 0,
+				pv4_state: 0,
 			});
 
 			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(1);
-			expect(adapter.setStateChangedAsync.calledWith("power.pvVoltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.callCount).to.equal(16);
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 50, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Current", { val: 2.3, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv2", { val: 300, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv2Voltage", { val: 180, ack: true })).to.be.true;
 		});
 
-		it("pollPVStatus handles only current present", async () => {
+		it("pollPVStatus handles partial response with some PVs active", async () => {
 			adapter.sendRequest = sandbox.stub().resolves({
-				pv_power: null,
-				pv_voltage: null,
-				pv_current: 2.3,
+				pv1_power: 500,
+				pv1_voltage: 220,
+				pv1_current: 2.3,
+				pv1_state: 1,
+				pv2_power: null,
+				pv2_voltage: null,
+				pv2_current: null,
+				pv2_state: null,
+				pv3_power: undefined,
+				pv3_voltage: undefined,
+				pv3_current: undefined,
+				pv3_state: undefined,
+				pv4_power: 0,
+				pv4_voltage: 0,
+				pv4_current: 0,
+				pv4_state: 0,
 			});
 
 			await adapter.pollPVStatus();
-			expect(adapter.setStateChangedAsync.callCount).to.equal(1);
-			expect(adapter.setStateChangedAsync.calledWith("power.pvCurrent", { val: 2.3, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.callCount).to.equal(8);
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1", { val: 50, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1Voltage", { val: 220, ack: true })).to.be.true;
+			expect(adapter.setStateChangedAsync.calledWith("power.pv1State", { val: 1, ack: true })).to.be.true;
+		});
+
+		it("pollPVStatus handles empty response", async () => {
+			adapter.sendRequest = sandbox.stub().resolves({});
+
+			await adapter.pollPVStatus();
+			expect(adapter.setStateChangedAsync.callCount).to.equal(0);
 		});
 	});
 
@@ -1304,13 +1563,16 @@ describe("MarstekVenusAdapter", function () {
 			sandbox.restore();
 		});
 
-		it("sends all 3 discovery attempts to broadcast and multicast", async () => {
+		it("sends one API-compliant discovery request to broadcast and multicast", async () => {
 			await adapter.discoverDevices();
-			expect(adapter._socket.send.callCount).to.equal(6);
-			// Verify broadcast (255.255.255.255) and multicast (239.255.255.250) are called for each attempt
+			expect(adapter._socket.send.callCount).to.equal(2);
+			// Verify broadcast (255.255.255.255) and multicast (239.255.255.250) are called for the single attempt
 			const calls = adapter._socket.send.getCalls();
-			// Each attempt: broadcast + multicast = 2 calls, 3 attempts = 6 total
-			expect(calls.length).to.equal(6);
+			expect(calls.length).to.equal(2);
+
+			const payload = JSON.parse(calls[0].args[0].toString());
+			expect(payload.method).to.equal("Marstek.GetDevice");
+			expect(payload.params).to.deep.equal({ ble_mac: "0" });
 		});
 
 		it("handles broadcast send errors gracefully", async () => {
@@ -1474,14 +1736,14 @@ describe("MarstekVenusAdapter", function () {
 			if (oldTimer) {
 				const clearIntervalSpy = sandbox.spy(adapter, "clearInterval");
 				const setIntervalSpy = sandbox.spy(adapter, "setInterval");
-				const pollPowerSpy = sandbox.spy(adapter, "pollPower");
+				const pollESStatusSpy = sandbox.spy(adapter, "pollESStatus");
 
 				adapter.startFastPolling();
 
 				expect(clearIntervalSpy.calledWith(oldTimer)).to.be.true;
 				expect(setIntervalSpy.called).to.be.true;
 				expect(adapter._fastPollTimer).to.not.be.null;
-				expect(pollPowerSpy.calledOnce).to.be.true;
+				expect(pollESStatusSpy.calledOnce).to.be.true;
 			}
 		});
 	});

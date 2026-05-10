@@ -42,10 +42,22 @@ Always run tests before committing changes.
 > npx mocha test/unit.test.js --exit
 > ```
 
-### Linting / Formatting
-This project currently has **no configured linter or formatter**.
-Do not add eslint/prettier unless explicitly requested.
-Follow existing code style conventions documented below.
+### Linting
+This project uses ESLint with `@iobroker/eslint-config`. Configuration is in `eslint.config.mjs`.
+
+| Command | Purpose |
+|---------|---------|
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with auto-fix |
+
+### i18n Translation
+| Command | Purpose |
+|---------|---------|
+| `npm run translate` | Run the translate-adapter tool |
+
+### Admin-UI
+- Use **JSONConfig** (`admin/jsonConfig.json`) for the admin UI
+- Set `translate: false` in the JSONConfig if translation is not desired
 
 ---
 

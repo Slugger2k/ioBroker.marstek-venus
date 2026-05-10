@@ -12,10 +12,10 @@ The ioBroker.marstek-venus adapter provides full integration with Marstek Venus 
 
 | Device | Open API | PV Support | Notes |
 |--------|:--------:|:----------:|-------|
-| Venus C | ✅ | ❌ | Supported |
-| Venus E 2.0 | ❌ | ❌ | **Not compatible** — causes CT003 disconnection |
-| Venus E 3.0 | ✅ | ❌ | Requires "new firmware" (Control ≥ v144) |
-| Venus D 3.0 | ✅ | ✅ | Supported |
+| Venus C | ❓ | ❓ | Supported |
+| Venus E 2.0 | ❓ | ❓ | **Not compatible** — causes CT003 disconnection |
+| Venus E 3.0 | ✅ | ❓ | Requires "new firmware" (Control ≥ v144) |
+| Venus D 3.0 | ❓ | ❓ | Supported |
 | Venus A 3.0 | ✅ | ✅ | Supported |
 
 > ⚠️ **Venus E 2.0 warning**: Using the Open API on Venus E 2.0 may cause disconnection between the device and the CT003 current transformer. This is confirmed by both the official Marstek integration and multiple community integrations.
@@ -46,7 +46,7 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 | WiFi | ✅ | ✅ | ✅ | ✅ |
 | Bluetooth | ✅ | ✅ | ✅ | ✅ |
 | Battery | ✅ | ✅ | ✅ | ✅ |
-| PV (Photovoltaic) | ❌ | ❌ | ✅ | ✅ |
+| PV (Photovoltaic) | ❓ | ❓ | ✅ | ✅ |
 | ES (Energy System) | ✅ | ✅ | ✅ | ✅ |
 | EM (Energy Meter) | ✅ | ✅ | ✅ | ✅ |
 | DOD | ✅ | ✅ (≥ v144) | ✅ | ✅ |
@@ -111,8 +111,6 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 
 ### Power States
 - **`marstek-venus.0.power.pv`** - PV power generation in W | W, ro
-- **`marstek-venus.0.power.pvVoltage`** - PV voltage in V | V, ro
-- **`marstek-venus.0.power.pvCurrent`** - PV current in A | A, ro
 - **`marstek-venus.0.power.grid`** - Grid power flow (positive=import, negative=export) | W, ro
 - **`marstek-venus.0.power.battery`** - Battery power flow in W | W, ro
 - **`marstek-venus.0.power.load`** - Load consumption in W | W, ro
@@ -133,6 +131,9 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.control.manualWeekdays`** - Manual mode weekdays (1=Mon, 127=all) | number, rw
 - **`marstek-venus.0.control.manualPower`** - Manual mode power target in W | W, rw
 - **`marstek-venus.0.control.manualEnable`** - Enable manual mode schedule (true/false) | bool, rw
+- **`marstek-venus.0.control.dodValue`** - Set DOD value (30-88) | %, rw
+- **`marstek-venus.0.control.bleBroadcastEnabled`** - Enable BLE broadcast (true=enabled, false=disabled) | bool, rw
+- **`marstek-venus.0.control.ledState`** - Set panel LED state (true=on, false=off) | bool, rw
 
 ### Network States
 - **`marstek-venus.0.network.ip`** - Device IP address | ip, ro
@@ -176,7 +177,7 @@ Manual mode uses 10 time slots per day (0-9). Configure:
 
 ## API Implementation
 
-The adapter implements 100% of the official Marstek Open API Revision 1.0:
+Implemented Marstek Open API endpoints (Rev 2.0):
 
 - `Marstek.GetDevice` - Device discovery and information
 - `Wifi.GetStatus` - WiFi connection status
@@ -187,6 +188,13 @@ The adapter implements 100% of the official Marstek Open API Revision 1.0:
 - `ES.GetMode` - Current operating mode
 - `ES.SetMode` - Set operating mode and configuration
 - `EM.GetStatus` - Energy meter measurements
+- `DOD.SET` - Set DOD value
+- `Ble.Adv` - Control BLE broadcasting
+- `Led.Ctrl` - Control panel LED state
+
+Additional adapter extension (not listed in provided Rev 2.0 spec):
+
+- `Marstek.SetTargetPower` - Direct target power control
 
 ## Troubleshooting
 
@@ -240,21 +248,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.18 (2026-04-25)
+- fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
+- chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
+
+### 0.1.17 (2026-04-24)
+- fix: correct PV1 power value scaling and update related unit tests
+
+### 0.1.16 (2026-04-24)
+- fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
+- fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
+- feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
+
+### 0.1.15 (2026-04-19)
+- refactor: replace fragile mixin pattern 
+- refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
+- fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
+- refactor: centralize poll interval magic numbers
+
+### 0.1.14 (2026-04-14)
 - Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
 - refactor: replace `setStateAsync` with `setState` across codebase for consistency
 - chore: adjust polling and timeout configuration ranges in jsonConfig
 - docs: expand README with detailed device support matrix, API component compatibility table, firmware details, and new warnings for Venus E 2.0 connectivity
-
-### 0.1.13 (2026-04-12)
-- Added Venus A device support to adapter descriptions
-- Updated all documentation to include Venus A in the supported devices list
-- Fix: validate and sanitize all `setSettings` input values (type coercion, numeric range clamping, IP whitespace trim) to prevent security issues
-
-### 0.1.12 (2026-04-12)
-- new release
-
-> Older changelog entries are available in [CHANGELOG_OLD.md](./CHANGELOG_OLD.md)
 
 ## Support
 

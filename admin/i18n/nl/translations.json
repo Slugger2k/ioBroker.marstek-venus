@@ -7,5 +7,14 @@
     "maxRetries": "Maximaal aantal nieuwe pogingen",
     "pollInterval": "Poll-interval",
     "requestTimeout": "Time-out aanvragen",
-    "udpPort": "UDP-poort"
+    "udpPort": "UDP-poort",
+    "endpointHeader": "API-eindpunten",
+    "endpointInfo": "Selecteer welke API-eindpunten de adapter moet pollen. Het uitschakelen van ongebruikte eindpunten vermindert de belasting van het apparaat.",
+    "enableESStatus": "ES.GetStatus (Vermogen, Energie, SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (Batterijdetails)",
+    "enableEMStatus": "EM.GetStatus (Energiemeter)",
+    "enableModeStatus": "ES.GetMode (Bedrijfsmodus)",
+    "enablePVStatus": "PV.GetStatus (Zonnepanelen)",
+    "enableWifiStatus": "Wifi.GetStatus (Netwerkinfo)",
+    "enableBLEStatus": "BLE.GetStatus (Bluetooth-status)"
 }

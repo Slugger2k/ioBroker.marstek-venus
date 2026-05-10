@@ -3,6 +3,18 @@
 const utils = require("@iobroker/adapter-core");
 const dgram = require("node:dgram");
 const { RateLimitQueue } = require("./lib/request-queue");
+const { Polling } = require("./lib/polling");
+const { Control } = require("./lib/control");
+const { Discovery } = require("./lib/discovery");
+const { Adapter: AdapterMixin } = require("./lib/adapter");
+const {
+	DEFAULT_FAST_POLL_INTERVAL,
+	DEFAULT_POLL_INTERVAL,
+	DEFAULT_SLOW_POLL_INTERVAL,
+	DEFAULT_REQUEST_TIMEOUT,
+	DEFAULT_MAX_RETRIES,
+	REQUEST_ID_WRAP,
+} = require("./lib/constants");
 
 /**
  *
@@ -29,6 +41,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 		this._discoveredIP = null;
 		this._discoveredDeviceModel = null;
 		this._pollingInProgress = false;
+		this._slowPollingInProgress = false;
 		this._pollFailureCount = 0;
 
 		this.on("ready", () => this.onReady());
@@ -49,6 +62,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 
 		this._socket.on("error", err => {
 			this.log.error(`UDP socket error: ${err.message}`);
+			this.recreateSocket();
 		});
 
 		this._socket.on("message", this.handleResponse.bind(this));
@@ -73,6 +87,34 @@ class MarstekVenusAdapter extends utils.Adapter {
 
 	/**
 	 *
+	 */
+	recreateSocket() {
+		if (this._socket) {
+			try {
+				this._socket.close();
+			} catch (e) {
+				this.log.debug(`Error closing socket: ${e.message}`);
+			}
+		}
+
+		this._socket = dgram.createSocket("udp4");
+
+		this._socket.on("error", err => {
+			this.log.error(`UDP socket error: ${err.message}`);
+			this.recreateSocket();
+		});
+
+		this._socket.on("message", this.handleResponse.bind(this));
+
+		this._socket.bind(0, () => {
+			this._socket.setBroadcast(true);
+			const address = this._socket.address();
+			this.log.debug(`UDP socket recreated and bound to ${address.address}:${address.port}`);
+		});
+	}
+
+	/**
+	 *
 	 * @param method
 	 * @param params
 	 */
@@ -91,89 +133,74 @@ class MarstekVenusAdapter extends utils.Adapter {
 
 		this._pendingRequestsByMethod = this._pendingRequestsByMethod || new Map();
 
-		const PLACEHOLDER = Symbol("pending");
-
 		const existing = this._pendingRequestsByMethod.get(method);
-		if (existing === PLACEHOLDER) {
-			return new Promise((resolve, reject) => {
-				let attempts = 0;
-				const checkInterval = this.setInterval(() => {
-					const updated = this._pendingRequestsByMethod.get(method);
-					if (updated && updated !== PLACEHOLDER) {
-						this.clearInterval(checkInterval);
-						resolve(updated);
-					} else if (!this._pendingRequestsByMethod.has(method)) {
-						this.clearInterval(checkInterval);
-						reject(new Error(`Request ${method} failed before completion`));
-					}
-					attempts++;
-					if (attempts > 500) {
-						this.clearInterval(checkInterval);
-						reject(new Error(`Request ${method} wait timeout`));
-					}
-				}, 20);
-			});
-		}
-
 		if (existing) {
 			this.log.debug(`Request ${method} already pending, reusing existing promise`);
 			return existing;
 		}
 
-		this._pendingRequestsByMethod.set(method, PLACEHOLDER);
-
-		const maxRetries = this.config.maxRetries || 3;
-		const timeoutMs = this.config.requestTimeout || 5000;
+		const timeoutMs = this.config.requestTimeout || DEFAULT_REQUEST_TIMEOUT;
 		const id = this._requestId++;
+		if (this._requestId > REQUEST_ID_WRAP) {
+			this._requestId = 1;
+		}
 		const request = { id, method, params };
 		const message = Buffer.from(JSON.stringify(request));
 
 		const promise = this._requestQueue.enqueue(
 			() =>
 				new Promise((resolve, reject) => {
-					let retryCount = 0;
+					const timeout = this.setTimeout(() => {
+						this._pendingRequests.delete(id);
+						this._pendingRequestsByMethod.delete(method);
+						this.log.warn(`sendRequest ${method} timed out after ${timeoutMs}ms`);
+						reject(new Error(`Request ${method} timed out`));
+					}, timeoutMs);
 
-					const sendOnce = () => {
-						const timeout = this.setTimeout(() => {
-							const pending = this._pendingRequests.get(id);
-							if (!pending) {
-								return;
-							}
+					this._pendingRequests.set(id, { resolve, reject, timeout, method });
 
-							retryCount++;
-							if (retryCount < maxRetries) {
-								this.log.debug(`Retry ${retryCount}/${maxRetries} for ${method}`);
-								sendOnce();
-							} else {
-								this._pendingRequests.delete(id);
-								this._pendingRequestsByMethod.delete(method);
-								this.log.warn(`sendRequest ${method} failed after ${retryCount} attempts`);
-								reject(new Error(`Request ${method} timed out after ${retryCount} attempts`));
-							}
-						}, timeoutMs);
-
-						this._pendingRequests.set(id, { resolve, reject, timeout, method });
-
-						this.log.debug(
-							`Sending ${method} to ${targetIP}:${this.config.udpPort} (attempt ${retryCount + 1}/${maxRetries})`,
-						);
-						this._socket.send(message, 0, message.length, this.config.udpPort, targetIP, err => {
-							if (err) {
-								this.clearTimeout(timeout);
-								this._pendingRequests.delete(id);
-								this._pendingRequestsByMethod.delete(method);
-								this.log.error(`sendRequest ${method} to ${targetIP} send error: ${err.message}`);
-								reject(err);
-							}
-						});
-					};
-
-					sendOnce();
+					this.log.debug(`Sending ${method} to ${targetIP}:${this.config.udpPort}`);
+					this.log.silly(`Request: ${message.toString()}`);
+					this._socket.send(message, 0, message.length, this.config.udpPort, targetIP, err => {
+						if (err) {
+							this.clearTimeout(timeout);
+							this._pendingRequests.delete(id);
+							this._pendingRequestsByMethod.delete(method);
+							this.log.error(`sendRequest ${method} to ${targetIP} send error: ${err.message}`);
+							reject(err);
+						}
+					});
 				}),
 		);
 
 		this._pendingRequestsByMethod.set(method, promise);
 		return promise;
+	}
+
+	/**
+	 * Send a request with retries (for control/write commands).
+	 * Each retry goes through the rate-limit queue.
+	 *
+	 * @param method
+	 * @param params
+	 * @param maxRetries
+	 */
+	async sendRequestWithRetry(method, params = {}, maxRetries) {
+		const retries = maxRetries !== undefined ? maxRetries : this.config.maxRetries || DEFAULT_MAX_RETRIES;
+		let lastError;
+		for (let attempt = 0; attempt < retries; attempt++) {
+			try {
+				return await this.sendRequest(method, params);
+			} catch (err) {
+				lastError = err;
+				if (attempt < retries - 1) {
+					const delay = 500 * Math.pow(2, attempt);
+					this.log.debug(`Retry ${attempt + 1}/${retries} for ${method} in ${delay}ms`);
+					await new Promise(resolve => this.setTimeout(resolve, delay));
+				}
+			}
+		}
+		throw lastError;
 	}
 
 	/**
@@ -183,6 +210,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	handleResponse(msgBuffer, rinfo) {
 		try {
+			this.log.silly(`Response from ${rinfo.address}:${rinfo.port}: ${msgBuffer.toString()}`);
 			const response = JSON.parse(msgBuffer.toString());
 			this.log.debug(`Received response from ${rinfo.address}:${rinfo.port}: ${JSON.stringify(response)}`);
 
@@ -201,9 +229,6 @@ class MarstekVenusAdapter extends utils.Adapter {
 					const resultValue = response.result;
 					pending.resolve(resultValue);
 					this.log.debug(`Request ${response.id} succeeded`);
-					pending.timeout = null;
-					pending.resolve = undefined;
-					pending.reject = undefined;
 				}
 			} else if (response.result && response.result.device) {
 				this.log.info(`Discovered device: ${response.result.device} at ${response.result.ip}`);
@@ -229,8 +254,12 @@ class MarstekVenusAdapter extends utils.Adapter {
 				} else {
 					this.log.warn(`Received discovery response without IP address: ${JSON.stringify(response.result)}`);
 				}
+			} else if (response.error) {
+				const apiCode = response.error.code;
+				const apiMessage = response.error.message;
+				this.log.debug(`Received API error response (${apiCode}): ${apiMessage}`);
 			} else {
-				this.log.debug(`Received unsolicited message: ${response.method}`);
+				this.log.debug(`Received unsolicited message: ${JSON.stringify(response)}`);
 			}
 		} catch (e) {
 			this.log.debug(`Invalid response received: ${e.message}`);
@@ -243,25 +272,31 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startFastPolling() {
-		this.log.info(`Starting fast polling loop (every ${this.config.fastPollInterval || 10000}ms)`);
+		if (this.config.enableESStatus === false) {
+			this.log.info("Fast polling disabled - ES.GetStatus not enabled in config");
+			return;
+		}
+		const fastInterval = this.config.fastPollInterval || DEFAULT_FAST_POLL_INTERVAL;
+		this.log.info(`Starting fast polling loop (every ${fastInterval}ms)`);
 		if (this._fastPollTimer) {
 			this.clearInterval(this._fastPollTimer);
 			this._fastPollTimer = null;
 		}
-		this._fastPollTimer = this.setInterval(() => this.pollPower(), this.config.fastPollInterval || 10000);
-		this.pollPower();
+		this._fastPollTimer = this.setInterval(() => this.pollESStatus(), fastInterval);
+		this.pollESStatus();
 	}
 
 	/**
 	 *
 	 */
 	startPolling() {
-		this.log.info(`Starting polling loop (every ${this.config.pollInterval || 30000}ms)`);
+		const pollInterval = this.config.pollInterval || DEFAULT_POLL_INTERVAL;
+		this.log.info(`Starting polling loop (every ${pollInterval}ms)`);
 		if (this._normalPollTimer) {
 			this.clearInterval(this._normalPollTimer);
 			this._normalPollTimer = null;
 		}
-		this._normalPollTimer = this.setInterval(() => this.poll(), this.config.pollInterval || 30000);
+		this._normalPollTimer = this.setInterval(() => this.poll(), pollInterval);
 		this.startFastPolling();
 		this.startSlowPolling();
 		this.poll();
@@ -271,13 +306,36 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 *
 	 */
 	startSlowPolling() {
-		this.log.info("Starting slow polling loop (info + network every 10 min)");
+		if (this.config.enableWifiStatus === false && this.config.enableBLEStatus === false) {
+			this.log.info("Slow polling disabled - no slow poll endpoints enabled in config");
+			return;
+		}
+		const slowInterval = this.config.slowPollInterval || DEFAULT_SLOW_POLL_INTERVAL;
+		this.log.info(`Starting slow polling loop (every ${slowInterval}ms)`);
 		if (this._slowPollTimer) {
 			this.clearInterval(this._slowPollTimer);
 			this._slowPollTimer = null;
 		}
-		this._slowPollTimer = this.setInterval(() => this.pollSlow(), 600000);
+		this._slowPollTimer = this.setInterval(() => this.pollSlow(), slowInterval);
 		this.pollSlow();
+	}
+
+	/**
+	 *
+	 */
+	stopPolling() {
+		if (this._normalPollTimer) {
+			this.clearInterval(this._normalPollTimer);
+			this._normalPollTimer = null;
+		}
+		if (this._slowPollTimer) {
+			this.clearInterval(this._slowPollTimer);
+			this._slowPollTimer = null;
+		}
+		if (this._fastPollTimer) {
+			this.clearInterval(this._fastPollTimer);
+			this._fastPollTimer = null;
+		}
 	}
 
 	/**
@@ -303,7 +361,30 @@ class MarstekVenusAdapter extends utils.Adapter {
 			this.config.autoDiscovery = !!settings.autoDiscovery;
 			this.config.ipAddress = typeof settings.ipAddress === "string" ? settings.ipAddress.trim() : "";
 			this.config.udpPort = Math.max(1, Math.min(65535, parseInt(settings.udpPort, 10) || 30000));
-			this.config.pollInterval = Math.max(20000, Math.min(120000, parseInt(settings.pollInterval, 10) || 30000));
+			this.config.pollInterval = Math.max(
+				20000,
+				Math.min(120000, parseInt(settings.pollInterval, 10) || DEFAULT_POLL_INTERVAL),
+			);
+			this.config.fastPollInterval = Math.max(
+				10000,
+				Math.min(120000, parseInt(settings.fastPollInterval, 10) || DEFAULT_FAST_POLL_INTERVAL),
+			);
+			this.config.maxRetries = Math.max(
+				1,
+				Math.min(10, parseInt(settings.maxRetries, 10) || DEFAULT_MAX_RETRIES),
+			);
+			this.config.requestTimeout = Math.max(
+				1000,
+				Math.min(30000, parseInt(settings.requestTimeout, 10) || DEFAULT_REQUEST_TIMEOUT),
+			);
+			this.config.deviceModel = settings.deviceModel || "";
+			this.config.enableESStatus = settings.enableESStatus !== false;
+			this.config.enableBatteryStatus = settings.enableBatteryStatus !== false;
+			this.config.enableEMStatus = settings.enableEMStatus !== false;
+			this.config.enableModeStatus = settings.enableModeStatus !== false;
+			this.config.enablePVStatus = settings.enablePVStatus !== false;
+			this.config.enableWifiStatus = settings.enableWifiStatus !== false;
+			this.config.enableBLEStatus = settings.enableBLEStatus !== false;
 
 			await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
 				native: {
@@ -311,10 +392,24 @@ class MarstekVenusAdapter extends utils.Adapter {
 					ipAddress: this.config.ipAddress,
 					udpPort: this.config.udpPort,
 					pollInterval: this.config.pollInterval,
+					fastPollInterval: this.config.fastPollInterval,
+					maxRetries: this.config.maxRetries,
+					requestTimeout: this.config.requestTimeout,
+					deviceModel: this.config.deviceModel,
+					enableESStatus: this.config.enableESStatus,
+					enableBatteryStatus: this.config.enableBatteryStatus,
+					enableEMStatus: this.config.enableEMStatus,
+					enableModeStatus: this.config.enableModeStatus,
+					enablePVStatus: this.config.enablePVStatus,
+					enableWifiStatus: this.config.enableWifiStatus,
+					enableBLEStatus: this.config.enableBLEStatus,
 				},
 			});
 
 			this.log.info("Settings saved and persisted");
+
+			this.stopPolling();
+			this.startPolling();
 
 			if (obj.callback) {
 				this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
@@ -330,6 +425,17 @@ class MarstekVenusAdapter extends utils.Adapter {
 							ipAddress: this.config.ipAddress,
 							udpPort: this.config.udpPort,
 							pollInterval: this.config.pollInterval,
+							fastPollInterval: this.config.fastPollInterval,
+							maxRetries: this.config.maxRetries,
+							requestTimeout: this.config.requestTimeout,
+							deviceModel: this.config.deviceModel,
+							enableESStatus: this.config.enableESStatus,
+							enableBatteryStatus: this.config.enableBatteryStatus,
+							enableEMStatus: this.config.enableEMStatus,
+							enableModeStatus: this.config.enableModeStatus,
+							enablePVStatus: this.config.enablePVStatus,
+							enableWifiStatus: this.config.enableWifiStatus,
+							enableBLEStatus: this.config.enableBLEStatus,
 						},
 					},
 					obj.callback,
@@ -348,18 +454,8 @@ class MarstekVenusAdapter extends utils.Adapter {
 		try {
 			this.log.info("Shutting down Marstek Venus adapter");
 
-			if (this._normalPollTimer) {
-				this.clearInterval(this._normalPollTimer);
-				this._normalPollTimer = null;
-			}
-			if (this._slowPollTimer) {
-				this.clearInterval(this._slowPollTimer);
-				this._slowPollTimer = null;
-			}
-			if (this._fastPollTimer) {
-				this.clearInterval(this._fastPollTimer);
-				this._fastPollTimer = null;
-			}
+			this.stopPolling();
+
 			if (this._requestQueue) {
 				this._requestQueue.clear(this);
 			}
@@ -367,52 +463,164 @@ class MarstekVenusAdapter extends utils.Adapter {
 				this._socket.close();
 			}
 
-			for (const [id, pending] of this._pendingRequests) {
+			for (const [id, pending] of [...this._pendingRequests.entries()]) {
 				this.clearTimeout(pending.timeout);
 				pending.reject(new Error("Adapter shutting down"));
 				this._pendingRequests.delete(id);
 			}
 
 			callback();
-		} catch {
+		} catch (err) {
+			this.log.error(`Error during shutdown: ${err.message}`);
 			callback();
+		}
+	}
+
+	/**
+	 *
+	 */
+	async initStates() {
+		if (AdapterMixin && AdapterMixin.prototype && AdapterMixin.prototype.initStates) {
+			await AdapterMixin.prototype.initStates.call(this);
+		} else {
+			this.log.warn("initStates: AdapterMixin not available");
+		}
+	}
+
+	/**
+	 *
+	 */
+	async discoverDevices() {
+		if (Discovery && Discovery.discoverDevices) {
+			await Discovery.discoverDevices.call(this);
+		}
+	}
+
+	/**
+	 *
+	 * @param fn
+	 * @param maxRetries
+	 */
+	async pollWithRetry(fn, maxRetries) {
+		if (Polling && Polling.pollWithRetry) {
+			return Polling.pollWithRetry.call(this, fn, maxRetries);
+		}
+		return fn();
+	}
+
+	/**
+	 *
+	 */
+	async poll() {
+		if (Polling && Polling.poll) {
+			await Polling.poll.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollSlow() {
+		if (Polling && Polling.pollSlow) {
+			await Polling.pollSlow.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollESStatus() {
+		if (Polling && Polling.pollESStatus) {
+			await Polling.pollESStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollBatteryStatus() {
+		if (Polling && Polling.pollBatteryStatus) {
+			await Polling.pollBatteryStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollPVStatus() {
+		if (Polling && Polling.pollPVStatus) {
+			await Polling.pollPVStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollWifiStatus() {
+		if (Polling && Polling.pollWifiStatus) {
+			await Polling.pollWifiStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollBLEStatus() {
+		if (Polling && Polling.pollBLEStatus) {
+			await Polling.pollBLEStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollEMStatus() {
+		if (Polling && Polling.pollEMStatus) {
+			await Polling.pollEMStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	async pollModeStatus() {
+		if (Polling && Polling.pollModeStatus) {
+			await Polling.pollModeStatus.call(this);
+		}
+	}
+
+	/**
+	 *
+	 */
+	hasPVSupport() {
+		if (Polling && Polling.hasPVSupport) {
+			return Polling.hasPVSupport.call(this);
+		}
+		return true;
+	}
+
+	/**
+	 *
+	 * @param id
+	 * @param state
+	 */
+	async onStateChange(id, state) {
+		if (Control && Control.onStateChange) {
+			await Control.onStateChange.call(this, id, state);
+		}
+	}
+
+	/**
+	 *
+	 * @param value
+	 */
+	async setControlTarget(value) {
+		if (Control && Control.setControlTarget) {
+			await Control.setControlTarget.call(this, value);
 		}
 	}
 }
 
-const { Adapter: AdapterMixin } = require("./lib/adapter");
-const { Polling } = require("./lib/polling");
-const { Control } = require("./lib/control");
-const { Discovery } = require("./lib/discovery");
-
-// Helper function to copy methods from mixin to prototype
-function copyMethods(target, source) {
-	if (!source) {
-		return;
-	}
-	if (source.prototype && Object.getPrototypeOf(source.prototype)) {
-		// It's a class - copy from prototype
-		Object.defineProperties(target, Object.getOwnPropertyDescriptors(source.prototype));
-	} else {
-		// It's a plain object - copy directly
-		Object.assign(target, source);
-	}
-}
-
-if (AdapterMixin) {
-	copyMethods(MarstekVenusAdapter.prototype, AdapterMixin);
-}
-if (Polling) {
-	copyMethods(MarstekVenusAdapter.prototype, Polling);
-}
-if (Control) {
-	copyMethods(MarstekVenusAdapter.prototype, Control);
-}
-if (Discovery) {
-	copyMethods(MarstekVenusAdapter.prototype, Discovery);
-}
-
-// Export both the class and the factory
 module.exports = MarstekVenusAdapter;
 module.exports.createAdapter = options => new MarstekVenusAdapter(options);
 

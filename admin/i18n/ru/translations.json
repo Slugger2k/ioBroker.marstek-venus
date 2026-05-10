@@ -7,5 +7,14 @@
     "maxRetries": "Макс. повторов",
     "pollInterval": "Интервал опроса",
     "requestTimeout": "Тайм-аут запроса",
-    "udpPort": "UDP-порт"
+    "udpPort": "UDP-порт",
+    "endpointHeader": "Конечные точки API",
+    "endpointInfo": "Выберите, какие конечные точки API должен опрашивать адаптер. Отключение неиспользуемых конечных точек снижает нагрузку на устройство.",
+    "enableESStatus": "ES.GetStatus (Мощность, Энергия, SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (Детали батареи)",
+    "enableEMStatus": "EM.GetStatus (Счётчик энергии)",
+    "enableModeStatus": "ES.GetMode (Режим работы)",
+    "enablePVStatus": "PV.GetStatus (Солнечные панели)",
+    "enableWifiStatus": "Wifi.GetStatus (Сетевая информация)",
+    "enableBLEStatus": "BLE.GetStatus (Статус Bluetooth)"
 }

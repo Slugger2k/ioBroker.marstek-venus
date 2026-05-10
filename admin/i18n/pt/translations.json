@@ -7,5 +7,14 @@
     "maxRetries": "Máximo de tentativas",
     "pollInterval": "Intervalo de pesquisa",
     "requestTimeout": "Solicitar tempo limite",
-    "udpPort": "Porta UDP"
+    "udpPort": "Porta UDP",
+    "endpointHeader": "Endpoints da API",
+    "endpointInfo": "Selecione quais endpoints de API o adaptador deve consultar. Desativar endpoints não utilizados reduz a carga do dispositivo.",
+    "enableESStatus": "ES.GetStatus (Potência, Energia, SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (Detalhes da Bateria)",
+    "enableEMStatus": "EM.GetStatus (Medidor de Energia)",
+    "enableModeStatus": "ES.GetMode (Modo de Operação)",
+    "enablePVStatus": "PV.GetStatus (Painéis Solares)",
+    "enableWifiStatus": "Wifi.GetStatus (Informações de Rede)",
+    "enableBLEStatus": "BLE.GetStatus (Status Bluetooth)"
 }

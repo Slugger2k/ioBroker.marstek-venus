@@ -7,5 +7,14 @@
     "fastPollInterval": "Fast Poll Interval",
     "requestTimeout": "Request Timeout",
     "maxRetries": "Max Retries",
-    "autoDiscovery": "Auto Discovery"
+    "autoDiscovery": "Auto Discovery",
+    "endpointHeader": "API Endpoints",
+    "endpointInfo": "Select which API endpoints the adapter should poll. Disabling unused endpoints reduces device load.",
+    "enableESStatus": "ES.GetStatus (Power, Energy, SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (Battery Details)",
+    "enableEMStatus": "EM.GetStatus (Energy Meter)",
+    "enableModeStatus": "ES.GetMode (Operating Mode)",
+    "enablePVStatus": "PV.GetStatus (Solar Panels)",
+    "enableWifiStatus": "Wifi.GetStatus (Network Info)",
+    "enableBLEStatus": "BLE.GetStatus (Bluetooth Status)"
 }

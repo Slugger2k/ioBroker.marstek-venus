@@ -7,5 +7,14 @@
     "maxRetries": "最大重试次数",
     "pollInterval": "轮询间隔",
     "requestTimeout": "请求超时",
-    "udpPort": "UDP端口"
+    "udpPort": "UDP端口",
+    "endpointHeader": "API 端点",
+    "endpointInfo": "选择适配器应轮询的 API 端点。禁用未使用的端点可减少设备负载。",
+    "enableESStatus": "ES.GetStatus (功率、能量、SoC)",
+    "enableBatteryStatus": "Bat.GetStatus (电池详情)",
+    "enableEMStatus": "EM.GetStatus (电能表)",
+    "enableModeStatus": "ES.GetMode (运行模式)",
+    "enablePVStatus": "PV.GetStatus (太阳能板)",
+    "enableWifiStatus": "Wifi.GetStatus (网络信息)",
+    "enableBLEStatus": "BLE.GetStatus (蓝牙状态)"
 }
