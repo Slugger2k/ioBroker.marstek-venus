@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: ioBroker/testing-action-deploy@v1
+      - uses: ioBroker/testing-action-deploy@v1.4.3
         with:
           node-version: '24.x'
           npm-token: ${{ secrets.NPM_TOKEN }}
