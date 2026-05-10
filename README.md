@@ -248,6 +248,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI (min: 60s, max: 3600s, default: 600s)
+- feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
+- feat: rename interval labels to Fast-Polling (FP), Standard-Polling (SP), Long-Polling (LP) for consistency across UI and logs
+- chore: update all log messages in `main.js` and `lib/polling.js` to use consistent Fast-Polling / Standard-Polling / Long-Polling terminology
+
 ### 0.1.18 (2026-04-25)
 - fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
 - chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation

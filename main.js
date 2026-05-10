@@ -273,11 +273,11 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	startFastPolling() {
 		if (this.config.enableESStatus === false) {
-			this.log.info("Fast polling disabled - ES.GetStatus not enabled in config");
+			this.log.info("Fast-Polling disabled - ES.GetStatus not enabled in config");
 			return;
 		}
 		const fastInterval = this.config.fastPollInterval || DEFAULT_FAST_POLL_INTERVAL;
-		this.log.info(`Starting fast polling loop (every ${fastInterval}ms)`);
+		this.log.info(`Starting Fast-Polling (every ${fastInterval}ms)`);
 		if (this._fastPollTimer) {
 			this.clearInterval(this._fastPollTimer);
 			this._fastPollTimer = null;
@@ -291,7 +291,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	startPolling() {
 		const pollInterval = this.config.pollInterval || DEFAULT_POLL_INTERVAL;
-		this.log.info(`Starting polling loop (every ${pollInterval}ms)`);
+		this.log.info(`Starting Standard-Polling (every ${pollInterval}ms)`);
 		if (this._normalPollTimer) {
 			this.clearInterval(this._normalPollTimer);
 			this._normalPollTimer = null;
@@ -307,11 +307,11 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	startSlowPolling() {
 		if (this.config.enableWifiStatus === false && this.config.enableBLEStatus === false) {
-			this.log.info("Slow polling disabled - no slow poll endpoints enabled in config");
+			this.log.info("Long-Polling disabled - no Long-Polling endpoints enabled in config");
 			return;
 		}
 		const slowInterval = this.config.slowPollInterval || DEFAULT_SLOW_POLL_INTERVAL;
-		this.log.info(`Starting slow polling loop (every ${slowInterval}ms)`);
+		this.log.info(`Starting Long-Polling (every ${slowInterval}ms)`);
 		if (this._slowPollTimer) {
 			this.clearInterval(this._slowPollTimer);
 			this._slowPollTimer = null;
@@ -369,6 +369,10 @@ class MarstekVenusAdapter extends utils.Adapter {
 				10000,
 				Math.min(120000, parseInt(settings.fastPollInterval, 10) || DEFAULT_FAST_POLL_INTERVAL),
 			);
+			this.config.slowPollInterval = Math.max(
+				60000,
+				Math.min(3600000, parseInt(settings.slowPollInterval, 10) || DEFAULT_SLOW_POLL_INTERVAL),
+			);
 			this.config.maxRetries = Math.max(
 				1,
 				Math.min(10, parseInt(settings.maxRetries, 10) || DEFAULT_MAX_RETRIES),
@@ -393,6 +397,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 					udpPort: this.config.udpPort,
 					pollInterval: this.config.pollInterval,
 					fastPollInterval: this.config.fastPollInterval,
+					slowPollInterval: this.config.slowPollInterval,
 					maxRetries: this.config.maxRetries,
 					requestTimeout: this.config.requestTimeout,
 					deviceModel: this.config.deviceModel,
@@ -426,6 +431,7 @@ class MarstekVenusAdapter extends utils.Adapter {
 							udpPort: this.config.udpPort,
 							pollInterval: this.config.pollInterval,
 							fastPollInterval: this.config.fastPollInterval,
+							slowPollInterval: this.config.slowPollInterval,
 							maxRetries: this.config.maxRetries,
 							requestTimeout: this.config.requestTimeout,
 							deviceModel: this.config.deviceModel,
