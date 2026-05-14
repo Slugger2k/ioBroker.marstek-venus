@@ -12,7 +12,6 @@ const {
 	DEFAULT_POLL_INTERVAL,
 	DEFAULT_SLOW_POLL_INTERVAL,
 	DEFAULT_REQUEST_TIMEOUT,
-	DEFAULT_MAX_RETRIES,
 	REQUEST_ID_WRAP,
 } = require("./lib/constants");
 
@@ -55,6 +54,64 @@ class MarstekVenusAdapter extends utils.Adapter {
 	 */
 	async onReady() {
 		this.log.info("Starting Marstek Venus adapter");
+		// Initialize all config fields with proper defaults on adapter start
+		// This ensures fields are set even if not present in installed adapter instance
+
+		// Ensure udpPort is set to a valid default if not configured
+		let port = parseInt(this.config.udpPort, 10);
+		if (isNaN(port) || port < 1 || port > 65535) {
+			port = 30000;
+		}
+		this.config.udpPort = port;
+
+		// Validate and correct pollInterval if needed
+		let pollInterval = parseInt(this.config.pollInterval, 10);
+		if (isNaN(pollInterval) || pollInterval < 20000 || pollInterval > 120000) {
+			pollInterval = 70000;
+		}
+		this.config.pollInterval = pollInterval;
+
+		// Validate and correct fastPollInterval if needed
+		let fastPollInterval = parseInt(this.config.fastPollInterval, 10);
+		if (isNaN(fastPollInterval) || fastPollInterval < 10000 || fastPollInterval > 120000) {
+			fastPollInterval = 35000;
+		}
+		this.config.fastPollInterval = fastPollInterval;
+
+		// Validate and correct slowPollInterval if needed
+		let slowPollInterval = parseInt(this.config.slowPollInterval, 10);
+		if (isNaN(slowPollInterval) || slowPollInterval < 60000 || slowPollInterval > 3600000) {
+			slowPollInterval = 600000;
+		}
+		this.config.slowPollInterval = slowPollInterval;
+
+		// Validate and correct requestTimeout if needed
+		let requestTimeout = parseInt(this.config.requestTimeout, 10);
+		if (isNaN(requestTimeout) || requestTimeout < 1000 || requestTimeout > 30000) {
+			requestTimeout = 7000;
+		}
+		this.config.requestTimeout = requestTimeout;
+
+		// Initialize boolean config fields with defaults
+		this.config.autoDiscovery = this.config.autoDiscovery !== false;
+		this.config.enableESStatus = this.config.enableESStatus !== false;
+		this.config.enableBatteryStatus = this.config.enableBatteryStatus !== false;
+		this.config.enableEMStatus = this.config.enableEMStatus !== false;
+		this.config.enableModeStatus = this.config.enableModeStatus !== false;
+		this.config.enablePVStatus = this.config.enablePVStatus !== false;
+		this.config.enableWifiStatus = this.config.enableWifiStatus !== false;
+		this.config.enableBLEStatus = this.config.enableBLEStatus !== false;
+
+		// Initialize string config fields
+		if (typeof this.config.ipAddress !== "string") {
+			this.config.ipAddress = "";
+		} else {
+			this.config.ipAddress = this.config.ipAddress.trim();
+		}
+
+		if (typeof this.config.deviceModel !== "string") {
+			this.config.deviceModel = "";
+		}
 
 		await this.initStates();
 
@@ -175,32 +232,6 @@ class MarstekVenusAdapter extends utils.Adapter {
 
 		this._pendingRequestsByMethod.set(method, promise);
 		return promise;
-	}
-
-	/**
-	 * Send a request with retries (for control/write commands).
-	 * Each retry goes through the rate-limit queue.
-	 *
-	 * @param method
-	 * @param params
-	 * @param maxRetries
-	 */
-	async sendRequestWithRetry(method, params = {}, maxRetries) {
-		const retries = maxRetries !== undefined ? maxRetries : this.config.maxRetries || DEFAULT_MAX_RETRIES;
-		let lastError;
-		for (let attempt = 0; attempt < retries; attempt++) {
-			try {
-				return await this.sendRequest(method, params);
-			} catch (err) {
-				lastError = err;
-				if (attempt < retries - 1) {
-					const delay = 500 * Math.pow(2, attempt);
-					this.log.debug(`Retry ${attempt + 1}/${retries} for ${method} in ${delay}ms`);
-					await new Promise(resolve => this.setTimeout(resolve, delay));
-				}
-			}
-		}
-		throw lastError;
 	}
 
 	/**
@@ -360,27 +391,42 @@ class MarstekVenusAdapter extends utils.Adapter {
 			const settings = obj.values;
 			this.config.autoDiscovery = !!settings.autoDiscovery;
 			this.config.ipAddress = typeof settings.ipAddress === "string" ? settings.ipAddress.trim() : "";
-			this.config.udpPort = Math.max(1, Math.min(65535, parseInt(settings.udpPort, 10) || 30000));
-			this.config.pollInterval = Math.max(
-				20000,
-				Math.min(120000, parseInt(settings.pollInterval, 10) || DEFAULT_POLL_INTERVAL),
-			);
-			this.config.fastPollInterval = Math.max(
-				10000,
-				Math.min(120000, parseInt(settings.fastPollInterval, 10) || DEFAULT_FAST_POLL_INTERVAL),
-			);
-			this.config.slowPollInterval = Math.max(
-				60000,
-				Math.min(3600000, parseInt(settings.slowPollInterval, 10) || DEFAULT_SLOW_POLL_INTERVAL),
-			);
-			this.config.maxRetries = Math.max(
-				1,
-				Math.min(10, parseInt(settings.maxRetries, 10) || DEFAULT_MAX_RETRIES),
-			);
-			this.config.requestTimeout = Math.max(
-				1000,
-				Math.min(30000, parseInt(settings.requestTimeout, 10) || DEFAULT_REQUEST_TIMEOUT),
-			);
+
+			// Validate and correct udpPort if needed
+			let udpPort = parseInt(settings.udpPort, 10);
+			if (isNaN(udpPort) || udpPort < 1 || udpPort > 65535) {
+				udpPort = 30000;
+			}
+			this.config.udpPort = udpPort;
+
+			// Validate and correct pollInterval if needed
+			let pollInterval = parseInt(settings.pollInterval, 10);
+			if (isNaN(pollInterval) || pollInterval < 20000 || pollInterval > 120000) {
+				pollInterval = DEFAULT_POLL_INTERVAL;
+			}
+			this.config.pollInterval = pollInterval;
+
+			// Validate and correct fastPollInterval if needed
+			let fastPollInterval = parseInt(settings.fastPollInterval, 10);
+			if (isNaN(fastPollInterval) || fastPollInterval < 10000 || fastPollInterval > 120000) {
+				fastPollInterval = DEFAULT_FAST_POLL_INTERVAL;
+			}
+			this.config.fastPollInterval = fastPollInterval;
+
+			// Validate and correct slowPollInterval if needed
+			let slowPollInterval = parseInt(settings.slowPollInterval, 10);
+			if (isNaN(slowPollInterval) || slowPollInterval < 60000 || slowPollInterval > 3600000) {
+				slowPollInterval = DEFAULT_SLOW_POLL_INTERVAL;
+			}
+			this.config.slowPollInterval = slowPollInterval;
+
+			// Validate and correct requestTimeout if needed
+			let requestTimeout = parseInt(settings.requestTimeout, 10);
+			if (isNaN(requestTimeout) || requestTimeout < 1000 || requestTimeout > 30000) {
+				requestTimeout = DEFAULT_REQUEST_TIMEOUT;
+			}
+			this.config.requestTimeout = requestTimeout;
+
 			this.config.deviceModel = settings.deviceModel || "";
 			this.config.enableESStatus = settings.enableESStatus !== false;
 			this.config.enableBatteryStatus = settings.enableBatteryStatus !== false;
@@ -398,7 +444,6 @@ class MarstekVenusAdapter extends utils.Adapter {
 					pollInterval: this.config.pollInterval,
 					fastPollInterval: this.config.fastPollInterval,
 					slowPollInterval: this.config.slowPollInterval,
-					maxRetries: this.config.maxRetries,
 					requestTimeout: this.config.requestTimeout,
 					deviceModel: this.config.deviceModel,
 					enableESStatus: this.config.enableESStatus,
@@ -432,7 +477,6 @@ class MarstekVenusAdapter extends utils.Adapter {
 							pollInterval: this.config.pollInterval,
 							fastPollInterval: this.config.fastPollInterval,
 							slowPollInterval: this.config.slowPollInterval,
-							maxRetries: this.config.maxRetries,
 							requestTimeout: this.config.requestTimeout,
 							deviceModel: this.config.deviceModel,
 							enableESStatus: this.config.enableESStatus,
@@ -500,18 +544,6 @@ class MarstekVenusAdapter extends utils.Adapter {
 		if (Discovery && Discovery.discoverDevices) {
 			await Discovery.discoverDevices.call(this);
 		}
-	}
-
-	/**
-	 *
-	 * @param fn
-	 * @param maxRetries
-	 */
-	async pollWithRetry(fn, maxRetries) {
-		if (Polling && Polling.pollWithRetry) {
-			return Polling.pollWithRetry.call(this, fn, maxRetries);
-		}
-		return fn();
 	}
 
 	/**

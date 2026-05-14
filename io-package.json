@@ -172,7 +172,6 @@
     "fastPollInterval": 35000,
     "slowPollInterval": 600000,
     "requestTimeout": 7000,
-    "maxRetries": 3,
     "autoDiscovery": true,
     "enableESStatus": true,
     "enableBatteryStatus": true,

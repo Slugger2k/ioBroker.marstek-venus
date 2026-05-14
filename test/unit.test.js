@@ -666,18 +666,20 @@ describe("MarstekVenusAdapter", function () {
 		});
 
 		it("handles poll cycle throw", async () => {
-			sandbox.stub(adapter, "pollWithRetry").callsFake(async () => {
-				throw new Error("Poll error");
-			});
+			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Poll error"));
+			adapter.pollPVStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(1);
 		});
 
 		it("handles poll cycle throw with 3 failures", async () => {
-			sandbox.stub(adapter, "pollWithRetry").callsFake(async () => {
-				throw new Error("Poll error");
-			});
+			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Poll error"));
+			adapter.pollPVStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(1);
@@ -688,22 +690,21 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.true;
 		});
 
-		it("handles pollWithRetry returning false", async () => {
-			sandbox.stub(adapter, "pollWithRetry").resolves(false);
+		it("handles poll task failure", async () => {
+			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Poll error"));
+			adapter.pollPVStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(1);
 		});
 
 		it("does not mark connection false on single poll failure", async () => {
-			sandbox.stub(adapter, "pollWithRetry").callsFake(async fn => {
-				try {
-					await fn();
-					return true;
-				} catch {
-					return false;
-				}
-			});
+			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Poll error"));
+			adapter.pollPVStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
 			expect(adapter.setState.calledWith("info.connection", { val: false, ack: true })).to.be.false;
@@ -711,14 +712,10 @@ describe("MarstekVenusAdapter", function () {
 		});
 
 		it("marks connection false after 3 consecutive poll failures", async () => {
-			sandbox.stub(adapter, "pollWithRetry").callsFake(async fn => {
-				try {
-					await fn();
-					return true;
-				} catch {
-					return false;
-				}
-			});
+			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Poll error"));
+			adapter.pollPVStatus = sandbox.stub().resolves();
+			adapter.pollEMStatus = sandbox.stub().resolves();
+			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
 			expect(adapter._pollFailureCount).to.equal(1);
@@ -734,15 +731,6 @@ describe("MarstekVenusAdapter", function () {
 		});
 
 		it("resets failure count on successful poll after failures", async () => {
-			sandbox.stub(adapter, "pollWithRetry").callsFake(async fn => {
-				try {
-					await fn();
-					return true;
-				} catch {
-					return false;
-				}
-			});
-
 			// First two polls fail (all poll functions fail)
 			adapter.pollBatteryStatus = sandbox.stub().rejects(new Error("Failed"));
 			adapter.pollPVStatus = sandbox.stub().rejects(new Error("Failed"));
@@ -771,49 +759,19 @@ describe("MarstekVenusAdapter", function () {
 			expect(adapter._pollingInProgress).to.be.true;
 		});
 
-		it("retries failed poll before marking failure", async () => {
-			sandbox.stub(global, "setTimeout").callsFake(fn => {
-				fn();
-				return 1;
-			});
-
+		it("does not retry failed poll before marking failure", async () => {
 			let attempts = 0;
 			adapter.pollBatteryStatus = sandbox.stub().callsFake(() => {
 				attempts++;
-				if (attempts < 2) {
-					return Promise.reject(new Error("Transient failure"));
-				}
-				return Promise.resolve();
+				return Promise.reject(new Error("Transient failure"));
 			});
 			adapter.pollPVStatus = sandbox.stub().resolves();
 			adapter.pollEMStatus = sandbox.stub().resolves();
 			adapter.pollModeStatus = sandbox.stub().resolves();
 
 			await adapter.poll();
-			expect(attempts).to.equal(2);
-			expect(adapter._pollFailureCount).to.equal(0);
-		});
-
-		it("returns false when all retry attempts fail", async () => {
-			sandbox.stub(global, "setTimeout").callsFake(fn => {
-				fn();
-				return 1;
-			});
-			adapter.pollESStatus = sandbox.stub().rejects(new Error("Permanent failure"));
-
-			const result = await adapter.pollWithRetry(() => adapter.pollESStatus());
-			expect(result).to.be.false;
-		});
-
-		it("returns true on successful attempt", async () => {
-			sandbox.stub(global, "setTimeout").callsFake(fn => {
-				fn();
-				return 1;
-			});
-			adapter.pollESStatus = sandbox.stub().resolves();
-
-			const result = await adapter.pollWithRetry(() => adapter.pollESStatus());
-			expect(result).to.be.true;
+			expect(attempts).to.equal(1);
+			expect(adapter._pollFailureCount).to.equal(1);
 		});
 	});
 
