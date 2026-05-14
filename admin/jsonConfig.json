@@ -40,6 +40,19 @@
       "lg": 4,
       "xl": 3
     },
+    "fastPollInterval": {
+      "type": "number",
+      "label": "fastPollInterval",
+      "min": 5000,
+      "max": 60000,
+      "default": 35000,
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 3,
+      "newLine": true
+    },
     "pollInterval": {
       "type": "number",
       "label": "pollInterval",
@@ -50,15 +63,14 @@
       "sm": 6,
       "md": 6,
       "lg": 4,
-      "xl": 3,
-      "newLine": true
+      "xl": 3
     },
-    "fastPollInterval": {
+    "slowPollInterval": {
       "type": "number",
-      "label": "fastPollInterval",
-      "min": 5000,
-      "max": 60000,
-      "default": 30000,
+      "label": "slowPollInterval",
+      "min": 60000,
+      "max": 3600000,
+      "default": 600000,
       "xs": 12,
       "sm": 6,
       "md": 6,

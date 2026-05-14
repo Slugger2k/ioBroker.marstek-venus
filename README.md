@@ -68,7 +68,6 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
   - **Normal poll** (default 20s): All status values
    - **Slow poll** (10min): Network status
 - ✅ **Request deduplication** - prevents overlapping requests
-- ✅ **Automatic retry** - 3 retries with 3000ms timeout per request
 - ✅ **Complete state coverage** (battery, power, energy, network, device info)
 - ✅ **Full control support** (Auto/AI/Manual/Passive modes)
 - ✅ **Manual mode configuration** (time slots, weekdays, power, enable/disable)
@@ -95,8 +94,7 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 | **udpPort** | UDP port for communication | 30000 |
 | **pollInterval** | Normal poll interval for all status values (ms) | 30000 |
 | **fastPollInterval** | Fast poll interval for power values (ms) | 10000 |
-| **requestTimeout** | Request timeout before retry (ms) | 5000 |
-| **maxRetries** | Max retry attempts per request | 3 |
+| **requestTimeout** | Request timeout for each request (ms) | 5000 |
 | **autoDiscovery** | Enable automatic device discovery | true |
 
 ## States Documentation
@@ -213,8 +211,7 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 ### Polling Issues
 - Adjust `fastPollInterval` for power value update frequency (default 5000ms)
 - Adjust `pollInterval` for normal status update frequency (default 20000ms)
-- Adjust `requestTimeout` if device needs more time to respond (default 3000ms)
-- Increase `maxRetries` for unreliable network connections
+- Adjust `requestTimeout` for slow or unstable networks
 - Slow poll runs every 10 minutes for network status
 
 ### State Updates Not Working
@@ -248,6 +245,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
+- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI (min: 60s, max: 3600s, default: 600s)
+- feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
+- feat: rename interval labels to Fast-Polling (FP), Standard-Polling (SP), Long-Polling (LP) for consistency across UI and logs
+- chore: update all log messages in `main.js` and `lib/polling.js` to use consistent Fast-Polling / Standard-Polling / Long-Polling terminology
+- fix: add missing `slowPollInterval` default to `io-package.json` native section (fixes installation failure)
+
 ### 0.1.18 (2026-04-25)
 - fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
 - chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
