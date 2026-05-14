@@ -247,11 +247,8 @@ SOFTWARE.
 ## Changelog
 ### **WORK IN PROGRESS**
 - refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
-- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI (min: 60s, max: 3600s, default: 600s)
+- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
 - feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
-- feat: rename interval labels to Fast-Polling (FP), Standard-Polling (SP), Long-Polling (LP) for consistency across UI and logs
-- chore: update all log messages in `main.js` and `lib/polling.js` to use consistent Fast-Polling / Standard-Polling / Long-Polling terminology
-- fix: add missing `slowPollInterval` default to `io-package.json` native section (fixes installation failure)
 
 ### 0.1.18 (2026-04-25)
 - fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
