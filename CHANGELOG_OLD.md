@@ -45,6 +45,12 @@ All changelog entries prior to the current version are stored here.
 
 ### 0.1.5 (2026-04-11)
 - Initial release with full Marstek Venus Open API support
+## 0.1.14 (2026-04-14)
+- Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
+- refactor: replace `setStateAsync` with `setState` across codebase for consistency
+- chore: adjust polling and timeout configuration ranges in jsonConfig
+- docs: expand README with detailed device support matrix, API component compatibility table, firmware details, and new warnings for Venus E 2.0 connectivity
+
 ## 0.1.12 (2026-04-12)
 - new release
 

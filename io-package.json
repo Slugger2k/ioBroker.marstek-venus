@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.18",
+    "version": "0.1.19-alpha.0",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
@@ -29,6 +29,19 @@
       "zh-cn": "Marstek Venus A/C/D/E 储能设备适配器"
     },
     "news": {
+      "0.1.19-alpha.0": {
+        "en": "refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only\nfeat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI\nfeat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI",
+        "de": "refactor: entfernen sie alle retry-logik aus anforderung/steuerung/polling-flow; alle anfragen sind jetzt nur ein versuch mit timeout-handling\nfeat: `slowPollInterval` (Long-Polling / LP) als konfigurierbares Feld in admin UI hinzufügen\nfeat: `[FP]`, `[SP]`, `[LP]` zu jedem API Endpoint Checkbox in admin UI hinzufügen",
+        "ru": "refactor: удалите всю логику повторных попыток из потока запросов/контроля/поллинга; все запросы теперь являются однократной попыткой с обработкой тайм-аута\nfeat: add 'slowPollInterval' (Long-Polling / LP) как настраиваемое поле в пользовательском интерфейсе администратора\nfeat: добавьте значки уровня опроса '[FP]', '[SP]', '[LP]' к каждой флажке конечной точки API в пользовательском интерфейсе администратора",
+        "pt": "refator: remova toda a lógica de repetição do fluxo request/control/polling; todas as solicitações são agora uma tentativa única com o manuseio de timeout somente\nfeat: add `slowPollInterval' (Long-Polling / LP) como campo configurável na interface de administração\nfeat: adicionar emblemas de nível de votação `[FP]`, `[SP]`, `[LP]` a cada caixa de seleção de endpoint da API na interface de administração",
+        "nl": "refactor: verwijder alle retry logica uit verzoek/controle/polling flow; alle verzoeken zijn nu enkelvoudig met timeout behandeling alleen\nfeat: voeg \nfeat: toe te voegen polling tier insignes ",
+        "fr": "refactor: supprimer toute la logique de réessayer du flux request/control/polling; toutes les requêtes sont maintenant un seul-tempt avec la manipulation de timeout seulement\nfeat: ajouter `slowPollInterval` (Long-Polling / LP) comme champ configurable dans l'interface utilisateur admin\nfeat: ajouter des badges de niveau de vote `[FP]`, `[SP]`, `[LP]` à chaque case de l'API dans l'interface utilisateur d'administration",
+        "it": "refactor: rimuovere tutta la logica di retry dal flusso richiesta/control/polling; tutte le richieste sono ora single-attempt con gestione timeout solo\nfeat: aggiungere `slowPollInterval` (Long-Polling / LP) come campo configurabile in admin UI\nfeat: aggiungere i badge di livello polling `[FP]`, `[SP]`, `[LP]` a ogni casella di controllo di endpoint API in admin UI",
+        "es": "refactor: eliminar toda lógica de reingreso de la petición/control/flujo de polarización; todas las solicitudes son ahora un solo intento de manejo de tiempo\nfeat: añadir `slowPollInterval` (Long-Polling / LP) como campo configurable en admin UI\nfeat: añadir poleing tier badges `[FP]`, `[SP]`, `[LP]` a cada casilla de verificación de punto final de API en admin UI",
+        "pl": "refactor: usunąć całą logikę ponownych prób z żądań / kontroli / sondażu przepływu; wszystkie wnioski są teraz jednorazowe próby tylko z obsługi timeout\nfeat: dodaj 'slowPollInterval' (Long- Polling / LP) jako pole konfiguracyjne w interfejsu administratora\nfeat: dodaj znaczniki poziomu ankietowego \"[FP]\", \"[SP]\", \"[LP]\" do każdego punktu końcowego API w polu administracyjnym UI",
+        "uk": "рефактор: видаліть всі логіки з запиту/контролю/покриття потоку; всі запити тепер є однопривабливими з часовою обробкою тільки\nfeat: додати `slowPollInterval` (Long-Polling / LP) як конфігураційне поле в адмін UI\nfeat: додати обпилюючі ярусні значки `[FP]`, `[SP]`, `[LP]` до кожного API-перевірки в адмін UI",
+        "zh-cn": "refactor:从请求/控制/保值流中删除所有重试逻辑;现在所有请求都是单试,只处理超时\n功绩: 添加“ slowPoll Interval” (长- Polling / LP) 作为可配置域 \n功绩:在行政总长的每个API端点检查框中增加投票级别徽章`[FP],`[SP],`[LP]'"
+      },
       "0.1.18": {
         "en": "fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)\nchore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation",
         "de": "fix: Verwenden Sie `ongrid power`/`offgrid power` von `ES.GetMode` Antwort auf Update `power.grid`/`power.load` (schließt #26)\nchore: entfernen Sie ungenutzte `power.pvVoltage` und `power.pvCurrent` Zustände aus Adapter und Dokumentation",
@@ -106,19 +119,6 @@
         "pl": "Dodano Wenus Obsługa urządzenia do opisu adaptera\nAktualizacja całej dokumentacji, aby włączyć Venus A na liście obsługiwanych urządzeń\nFix: walidacja i oczyszczanie wszystkich wartości wejściowych 'setSettings' (typ przymus, zaciśnięcie zakresu liczbowego, wykończenie IP whitespace), aby zapobiec problemom bezpieczeństwa",
         "uk": "Доданий Венера Підтримка пристрою для описів адаптера\nОновлено всю документацію для включення Венери A в список підтримуваних пристроїв\nВиправлення: валідувати та утилізувати всі значення вводу `setSettings` (кодування типу, затискач для нумерного діапазону, обробка білого простору IP) для запобігання проблем безпеки",
         "zh-cn": "添加金星 适配器描述的设备支持\n更新所有文档, 将金星 A 列入支持的设备列表\n修正:验证和消毒所有“设置”输入值(类型强制、数字范围夹、IP白空间裁),以防止安全问题"
-      },
-      "0.1.12": {
-        "en": "new release",
-        "de": "neue veröffentlichung",
-        "ru": "новый выпуск",
-        "pt": "nova versão",
-        "nl": "nieuwe release",
-        "fr": "nouvelle version",
-        "it": "nuova release",
-        "es": "nueva versión",
-        "pl": "nowe wydanie",
-        "uk": "новий реліз",
-        "zh-cn": "新发行"
       }
     },
     "icon": "marstek-venus.png",

@@ -245,7 +245,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.19-alpha.0 (2026-05-14)
 - refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
 - feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
 - feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
@@ -267,12 +267,6 @@ SOFTWARE.
 - refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
 - fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
 - refactor: centralize poll interval magic numbers
-
-### 0.1.14 (2026-04-14)
-- Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
-- refactor: replace `setStateAsync` with `setState` across codebase for consistency
-- chore: adjust polling and timeout configuration ranges in jsonConfig
-- docs: expand README with detailed device support matrix, API component compatibility table, firmware details, and new warnings for Venus E 2.0 connectivity
 
 ## Support
 
