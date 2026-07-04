@@ -225,6 +225,7 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - Ensure manual mode settings are valid
 
 
+## Changelog
 ### **WORK IN PROGRESS**
 
 ### 0.2.0 (2026-07-04)
