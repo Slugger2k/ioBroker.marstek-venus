@@ -135,6 +135,9 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 
 ### Network States
 - **`marstek-venus.0.network.ip`** - Device IP address | ip, ro
+- **`marstek-venus.0.network.gateway`** - Network gateway | string, ro
+- **`marstek-venus.0.network.mask`** - Subnet mask | string, ro
+- **`marstek-venus.0.network.dns`** - DNS server | string, ro
 - **`marstek-venus.0.network.ssid`** - WiFi SSID | string, ro
 - **`marstek-venus.0.network.rssi`** - WiFi signal strength in dBm | dBm, ro
 - **`marstek-venus.0.network.bleState`** - BLE connection state (connected/disconnected) | enum, ro
@@ -151,6 +154,8 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.energymeter.powerB`** - Phase B power in W | W, ro
 - **`marstek-venus.0.energymeter.powerC`** - Phase C power in W | W, ro
 - **`marstek-venus.0.energymeter.powerTotal`** - Total three-phase power in W | W, ro
+- **`marstek-venus.0.energymeter.inputTotal`** - Total energy import from grid | Wh, ro
+- **`marstek-venus.0.energymeter.outputTotal`** - Total energy export to grid | Wh, ro
 
 ## Control and Operation
 
@@ -247,6 +252,9 @@ SOFTWARE.
 ## Changelog
 ### **WORK IN PROGRESS**
 - fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
+- feat: update implementation to match Marstek Device Open API Rev 2.0
+    - add network information states (gateway, mask, dns)
+    - add total energy import/export states for energy meter
 
 ### 0.1.19-alpha.0 (2026-05-14)
 - refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
