@@ -250,7 +250,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.19 (2026-07-04)
 - fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
 - feat: update implementation to match Marstek Device Open API Rev 2.0
     - add network information states (gateway, mask, dns)
@@ -272,12 +272,6 @@ SOFTWARE.
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
 - feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
-
-### 0.1.15 (2026-04-19)
-- refactor: replace fragile mixin pattern 
-- refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
-- fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
-- refactor: centralize poll interval magic numbers
 
 ## Support
 
