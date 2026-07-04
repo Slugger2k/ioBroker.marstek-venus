@@ -4,7 +4,6 @@
     "header": "Configuración de Marstek Venus",
     "info": "Requisitos previos: primero habilite Open API en la aplicación móvil oficial de Marstek, tenga en cuenta el puerto UDP configurado (predeterminado: 30000) y asegúrese de que el dispositivo y ioBroker estén en la misma red local.",
     "ipAddress": "Dirección IP",
-    "maxRetries": "Reintentos máximos",
     "pollInterval": "Intervalo Standard-Polling (SP)",
     "slowPollInterval": "Intervalo Long-Polling (LP)",
     "requestTimeout": "Solicitar tiempo de espera",

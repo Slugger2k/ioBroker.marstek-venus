@@ -250,6 +250,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- chore: remove unused `maxRetries` translation key from all language files
+
 ### 0.1.19 (2026-07-04)
 - fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
 - feat: update implementation to match Marstek Device Open API Rev 2.0

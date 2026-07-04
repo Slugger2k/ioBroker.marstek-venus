@@ -4,7 +4,6 @@
     "header": "Configuração Marstek Vênus",
     "info": "Pré-requisitos: primeiro habilite o Open API no aplicativo móvel oficial da Marstek, observe a porta UDP configurada (padrão: 30000) e certifique-se de que o dispositivo e o ioBroker estejam na mesma rede local.",
     "ipAddress": "Endereço IP",
-    "maxRetries": "Máximo de tentativas",
     "pollInterval": "Intervalo Standard-Polling (SP)",
     "slowPollInterval": "Intervalo Long-Polling (LP)",
     "requestTimeout": "Solicitar tempo limite",

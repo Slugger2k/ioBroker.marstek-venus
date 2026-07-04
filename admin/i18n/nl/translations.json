@@ -4,7 +4,6 @@
     "header": "Marstek Venus-configuratie",
     "info": "Vereisten: Schakel eerst Open API in de officiële Marstek mobiele app in, noteer de geconfigureerde UDP-poort (standaard: 30000) en zorg ervoor dat het apparaat en ioBroker zich op hetzelfde lokale netwerk bevinden.",
     "ipAddress": "IP-adres",
-    "maxRetries": "Maximaal aantal nieuwe pogingen",
     "pollInterval": "Standard-Polling interval (SP)",
     "slowPollInterval": "Long-Polling interval (LP)",
     "requestTimeout": "Time-out aanvragen",

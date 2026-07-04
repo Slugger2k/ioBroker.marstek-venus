@@ -4,7 +4,6 @@
     "header": "Marstek Venus 配置",
     "info": "前置要求：首先在Marstek官方移动应用程序中启用Open API，记下配置的UDP端口（默认：30000），并确保设备和ioBroker位于同一本地网络。",
     "ipAddress": "IP地址",
-    "maxRetries": "最大重试次数",
     "pollInterval": "Standard-Polling 间隔 (SP)",
     "slowPollInterval": "Long-Polling 间隔 (LP)",
     "requestTimeout": "请求超时",

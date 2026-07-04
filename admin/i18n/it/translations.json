@@ -4,7 +4,6 @@
     "header": "Configurazione di Venere Marstek",
     "info": "Prerequisiti: abilitare prima l'Open API nell'app mobile ufficiale Marstek, annotare la porta UDP configurata (impostazione predefinita: 30000) e assicurarsi che il dispositivo e ioBroker siano sulla stessa rete locale.",
     "ipAddress": "Indirizzo IP",
-    "maxRetries": "Numero massimo di tentativi",
     "pollInterval": "Intervallo Standard-Polling (SP)",
     "slowPollInterval": "Intervallo Long-Polling (LP)",
     "requestTimeout": "Richiedi timeout",

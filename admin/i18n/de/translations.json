@@ -7,7 +7,6 @@
     "pollInterval": "Standard-Polling Intervall (SP)",
     "slowPollInterval": "Long-Polling Intervall (LP)",
     "requestTimeout": "Anfrage-Timeout",
-    "maxRetries": "Maximale Wiederholungen",
     "autoDiscovery": "Automatische Erkennung",
     "endpointHeader": "API-Endpunkte",
     "endpointInfo": "Wählen Sie, welche API-Endpunkte der Adapter abfragen soll. Das Abfrage-Tier (FP/SP/LP) wird neben jedem Endpunkt angezeigt. Das Deaktivieren ungenutzter Endpunkte reduziert die Gerätelast.",
