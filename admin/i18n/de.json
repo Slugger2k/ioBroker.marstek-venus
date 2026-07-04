@@ -1,4 +1,5 @@
 {
+    "192.168.1.xxx": "192.168.1.xxx",
     "autoDiscovery": "Automatische Erkennung",
     "enableBLEStatus": "[LP] BLE.GetStatus (Bluetooth-Status)",
     "enableBatteryStatus": "[SP] Bat.GetStatus (Batteriedetails)",
