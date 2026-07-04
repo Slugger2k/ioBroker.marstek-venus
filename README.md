@@ -127,7 +127,7 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.control.manualStartTime`** - Manual mode start time (HH:MM) | string, rw
 - **`marstek-venus.0.control.manualEndTime`** - Manual mode end time (HH:MM) | string, rw
 - **`marstek-venus.0.control.manualWeekdays`** - Manual mode weekdays (1=Mon, 127=all) | number, rw
-- **`marstek-venus.0.control.manualPower`** - Manual mode power target in W | W, rw
+- **`marstek-venus.0.control.manualPower`** - Manual mode power target in W (positive=charge, negative=discharge) | W, rw
 - **`marstek-venus.0.control.manualEnable`** - Enable manual mode schedule (true/false) | bool, rw
 - **`marstek-venus.0.control.dodValue`** - Set DOD value (30-88) | %, rw
 - **`marstek-venus.0.control.bleBroadcastEnabled`** - Enable BLE broadcast (true=enabled, false=disabled) | bool, rw
