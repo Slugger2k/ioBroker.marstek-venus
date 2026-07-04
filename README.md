@@ -251,6 +251,7 @@ SOFTWARE.
 
 ## Changelog
 ### **WORK IN PROGRESS**
+- Fixed peer dependency conflict between `eslint-plugin-jsdoc` and `@iobroker/eslint-config`.
 - Updated ESLint to v10.4.1 and upgraded all linting plugins for compatibility.
 
 ### 0.1.19 (2026-07-04)
