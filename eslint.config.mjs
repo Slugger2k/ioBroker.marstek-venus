@@ -6,7 +6,14 @@ export default [
 
 	// Specify files to exclude from linting
 	{
-		ignores: ["build/", "test/baselines/", ".eslintrc.js", ".prettierrc.js", "node-modules/"],
+		ignores: [
+			"build/",
+			"test/baselines/",
+			".eslintrc.js",
+			".prettierrc.js",
+			"node-modules/",
+			"docs/ioBroker.docs/",
+		],
 	},
 
 	// Custom rules for this project

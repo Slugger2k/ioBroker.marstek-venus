@@ -135,6 +135,9 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 
 ### Network States
 - **`marstek-venus.0.network.ip`** - Device IP address | ip, ro
+- **`marstek-venus.0.network.gateway`** - Network gateway | string, ro
+- **`marstek-venus.0.network.mask`** - Subnet mask | string, ro
+- **`marstek-venus.0.network.dns`** - DNS server | string, ro
 - **`marstek-venus.0.network.ssid`** - WiFi SSID | string, ro
 - **`marstek-venus.0.network.rssi`** - WiFi signal strength in dBm | dBm, ro
 - **`marstek-venus.0.network.bleState`** - BLE connection state (connected/disconnected) | enum, ro
@@ -151,6 +154,8 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.energymeter.powerB`** - Phase B power in W | W, ro
 - **`marstek-venus.0.energymeter.powerC`** - Phase C power in W | W, ro
 - **`marstek-venus.0.energymeter.powerTotal`** - Total three-phase power in W | W, ro
+- **`marstek-venus.0.energymeter.inputTotal`** - Total energy import from grid | Wh, ro
+- **`marstek-venus.0.energymeter.outputTotal`** - Total energy export to grid | Wh, ro
 
 ## Control and Operation
 
@@ -166,7 +171,7 @@ Manual mode uses 10 time slots per day (0-9). Configure:
 - **`control.manualStartTime`** - Start time for the slot (HH:MM)
 - **`control.manualEndTime`** - End time for the slot (HH:MM)
 - **`control.manualWeekdays`** - Bitmask for weekdays (1=Mon, 127=all)
-- **`control.manualPower`** - Target power for the slot in W
+- **`control.manualPower`** - Target power for the slot in W (positive=charge, negative=discharge)
 - **`control.manualEnable`** - Enable this time slot
 
 ### Passive Mode Configuration
@@ -245,6 +250,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- Updated ESLint to v10.4.1 and upgraded all linting plugins for compatibility.
+
+### 0.1.19 (2026-07-04)
+- fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
+- feat: update implementation to match Marstek Device Open API Rev 2.0
+    - add network information states (gateway, mask, dns)
+    - add total energy import/export states for energy meter
+
 ### 0.1.19-alpha.0 (2026-05-14)
 - refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
 - feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
@@ -261,12 +275,6 @@ SOFTWARE.
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
 - feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
-
-### 0.1.15 (2026-04-19)
-- refactor: replace fragile mixin pattern 
-- refactor: replace busy-wait polling loop in sendRequest() with direct promise chain reuse
-- fix: PLACEHOLDER Symbol comparison - now defined once at module level instead of per-call
-- refactor: centralize poll interval magic numbers
 
 ## Support
 
