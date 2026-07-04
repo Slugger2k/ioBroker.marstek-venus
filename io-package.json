@@ -2,6 +2,7 @@
   "common": {
     "name": "marstek-venus",
     "version": "0.1.19",
+    "title": "Marstek Venus",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
       "de": "Marstek Venus Energiespeicher",
@@ -127,6 +128,7 @@
     "authors": [
       "Slugger2k"
     ],
+    "author": "Slugger2k",
     "licenseInformation": {
       "license": "MIT",
       "type": "free"
@@ -181,7 +183,7 @@
     "enableWifiStatus": true,
     "enableBLEStatus": true
   },
-  "instanceObjects": [
+    "instanceObjects": [
     {
       "_id": "info",
       "type": "channel",
@@ -196,7 +198,7 @@
       "type": "channel",
       "common": {
         "name": "Battery",
-        "role": "battery"
+        "role": "value.battery"
       },
       "native": {}
     },
@@ -205,7 +207,7 @@
       "type": "channel",
       "common": {
         "name": "Power",
-        "role": "power"
+        "role": "value.power"
       },
       "native": {}
     },
@@ -214,7 +216,7 @@
       "type": "channel",
       "common": {
         "name": "Energy",
-        "role": "energy"
+        "role": "value.energy"
       },
       "native": {}
     },
@@ -223,7 +225,7 @@
       "type": "channel",
       "common": {
         "name": "Control",
-        "role": "control"
+        "role": "level"
       },
       "native": {}
     },
@@ -241,7 +243,7 @@
       "type": "channel",
       "common": {
         "name": "Energy Meter",
-        "role": "meter"
+        "role": "value.power"
       },
       "native": {}
     }

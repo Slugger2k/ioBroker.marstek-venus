@@ -5,7 +5,7 @@
 
 # ioBroker.marstek-venus Adapter
 
-The ioBroker.marstek-venus adapter provides full integration with Marstek Venus series energy storage systems, implementing the official Open API for complete device control and monitoring.
+The ioBroker.marstek-venus adapter provides full integration with [Marstek](https://www.marstekenergy.com/) Venus series energy storage systems, implementing the official Open API for complete device control and monitoring.
 
 ## Device Support
 > Sources: [marstekEnergy/ha_marstek](https://github.com/marstekEnergy/ha_marstek), [taurgis/has-marstek-local-api](https://github.com/taurgis/has-marstek-local-api), [rweijnen/marstek-firmware-archive](https://github.com/rweijnen/marstek-firmware-archive)
@@ -251,6 +251,7 @@ SOFTWARE.
 
 ## Changelog
 ### **WORK IN PROGRESS**
+- fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
 - chore: remove unused `maxRetries` translation key from all language files
 
 ### 0.1.19 (2026-07-04)
