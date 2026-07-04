@@ -1,0 +1,21 @@
+{
+    "192.168.1.xxx": "192.168.1.xxx",
+    "autoDiscovery": "Auto Discovery",
+    "enableBLEStatus": "[LP] BLE.GetStatus (Bluetooth Status)",
+    "enableBatteryStatus": "[SP] Bat.GetStatus (Battery Details)",
+    "enableEMStatus": "[SP] EM.GetStatus (Energy Meter)",
+    "enableESStatus": "[FP] ES.GetStatus (Power, Energy, SoC)",
+    "enableModeStatus": "[SP] ES.GetMode (Operating Mode)",
+    "enablePVStatus": "[SP] PV.GetStatus (Solar Panels)",
+    "enableWifiStatus": "[LP] Wifi.GetStatus (Network Info)",
+    "endpointHeader": "API Endpoints",
+    "endpointInfo": "Select which API endpoints the adapter should poll. The polling tier (FP/SP/LP) is shown next to each endpoint. Disabling unused endpoints reduces device load.",
+    "fastPollInterval": "Fast-Polling Interval (FP)",
+    "header": "Marstek Venus Configuration",
+    "info": "Pre-requirements: Enable Open API in the official Marstek mobile app first, note the configured UDP port (default: 30000), and ensure device and ioBroker are on the same local network.",
+    "ipAddress": "IP Address",
+    "pollInterval": "Standard-Polling Interval (SP)",
+    "requestTimeout": "Request Timeout",
+    "slowPollInterval": "Long-Polling Interval (LP)",
+    "udpPort": "UDP Port"
+}

@@ -225,6 +225,45 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - Ensure manual mode settings are valid
 
 
+### **WORK IN PROGRESS**
+
+### 0.2.0 (2026-07-04)
+- fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
+- chore: remove unused `maxRetries` translation key from all language files
+- chore: update dependencies and Node.js version requirements
+- fix: use adapter.setTimeout instead of plain setTimeout
+- fix: move license to the end of README.md and add link to CHANGELOG_OLD.md
+- chore: enable trusted publishing by removing npm-token from GitHub Actions
+
+### 0.1.19 (2026-07-04)
+- fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
+- feat: update implementation to match Marstek Device Open API Rev 2.0
+    - add network information states (gateway, mask, dns)
+    - add total energy import/export states for energy meter
+
+### 0.1.19-alpha.0 (2026-05-14)
+- refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
+- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
+- feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
+
+### 0.1.18 (2026-04-25)
+- fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
+- chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
+
+### 0.1.17 (2026-04-24)
+- fix: correct PV1 power value scaling and update related unit tests
+
+See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
+
+## Support
+
+For support, visit the ioBroker forum or GitHub repository. When reporting issues, please include:
+- Adapter version
+- Device model
+- Firmware version
+- Network configuration
+- Detailed error messages
+
 ## License
 
 MIT License
@@ -248,35 +287,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-## Changelog
-### 0.2.0 (2026-07-04)
-- fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
-- chore: remove unused `maxRetries` translation key from all language files
-
-### 0.1.19 (2026-07-04)
-- fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
-- feat: update implementation to match Marstek Device Open API Rev 2.0
-    - add network information states (gateway, mask, dns)
-    - add total energy import/export states for energy meter
-
-### 0.1.19-alpha.0 (2026-05-14)
-- refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
-- feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
-- feat: add polling tier badges `[FP]`, `[SP]`, `[LP]` to each API endpoint checkbox in admin UI
-
-### 0.1.18 (2026-04-25)
-- fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
-- chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
-
-### 0.1.17 (2026-04-24)
-- fix: correct PV1 power value scaling and update related unit tests
-
-## Support
-
-For support, visit the ioBroker forum or GitHub repository. When reporting issues, please include:
-- Adapter version
-- Device model
-- Firmware version
-- Network configuration
-- Detailed error messages

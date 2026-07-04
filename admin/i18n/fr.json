@@ -1,0 +1,20 @@
+{
+    "autoDiscovery": "Découverte automatique",
+    "enableBLEStatus": "[LP] BLE.GetStatus (État Bluetooth)",
+    "enableBatteryStatus": "[SP] Bat.GetStatus (Détails Batterie)",
+    "enableEMStatus": "[SP] EM.GetStatus (Compteur d'Énergie)",
+    "enableESStatus": "[FP] ES.GetStatus (Puissance, Énergie, SoC)",
+    "enableModeStatus": "[SP] ES.GetMode (Mode de Fonctionnement)",
+    "enablePVStatus": "[SP] PV.GetStatus (Panneaux Solaires)",
+    "enableWifiStatus": "[LP] Wifi.GetStatus (Infos Réseau)",
+    "endpointHeader": "Points de terminaison API",
+    "endpointInfo": "Sélectionnez les points de terminaison API que l'adaptateur doit interroger. Le niveau d'interrogation (FP/SP/LP) est affiché à côté de chaque point. La désactivation des points non utilisés réduit la charge de l'appareil.",
+    "fastPollInterval": "Intervalle Fast-Polling (FP)",
+    "header": "Configuration de Marstek Vénus",
+    "info": "Prérequis : activez d'abord l'Open API dans l'application mobile officielle Marstek, notez le port UDP configuré (par défaut : 30 000) et assurez-vous que l'appareil et ioBroker sont sur le même réseau local.",
+    "ipAddress": "Adresse IP",
+    "pollInterval": "Intervalle Standard-Polling (SP)",
+    "requestTimeout": "Délai d'expiration de la demande",
+    "slowPollInterval": "Intervalle Long-Polling (LP)",
+    "udpPort": "Port UDP"
+}

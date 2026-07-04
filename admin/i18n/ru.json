@@ -1,0 +1,20 @@
+{
+    "autoDiscovery": "Авто обнаружение",
+    "enableBLEStatus": "[LP] BLE.GetStatus (Статус Bluetooth)",
+    "enableBatteryStatus": "[SP] Bat.GetStatus (Детали батареи)",
+    "enableEMStatus": "[SP] EM.GetStatus (Счётчик энергии)",
+    "enableESStatus": "[FP] ES.GetStatus (Мощность, Энергия, SoC)",
+    "enableModeStatus": "[SP] ES.GetMode (Режим работы)",
+    "enablePVStatus": "[SP] PV.GetStatus (Солнечные панели)",
+    "enableWifiStatus": "[LP] Wifi.GetStatus (Сетевая информация)",
+    "endpointHeader": "Конечные точки API",
+    "endpointInfo": "Выберите, какие конечные точки API должен опрашивать адаптер. Уровень опроса (FP/SP/LP) отображается рядом с каждой точкой. Отключение неиспользуемых точек снижает нагрузку на устройство.",
+    "fastPollInterval": "Интервал Fast-Polling (FP)",
+    "header": "Конфигурация Марстек Венера",
+    "info": "Предварительные требования: сначала включите Open API в официальном мобильном приложении Marstek, запишите настроенный порт UDP (по умолчанию: 30000) и убедитесь, что устройство и ioBroker находятся в одной локальной сети.",
+    "ipAddress": "IP-адрес",
+    "pollInterval": "Интервал Standard-Polling (SP)",
+    "requestTimeout": "Тайм-аут запроса",
+    "slowPollInterval": "Интервал Long-Polling (LP)",
+    "udpPort": "UDP-порт"
+}
