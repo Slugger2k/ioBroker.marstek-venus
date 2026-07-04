@@ -234,6 +234,7 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - fix: use adapter.setTimeout instead of plain setTimeout
 - fix: move license to the end of README.md and add link to CHANGELOG_OLD.md
 - chore: enable trusted publishing by removing npm-token from GitHub Actions
+- fix: corrected invalid `@alcalzone/release-script-plugin-*` versions in `package.json`
 
 ### 0.1.19 (2026-07-04)
 - fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
