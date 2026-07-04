@@ -1416,10 +1416,10 @@ describe("MarstekVenusAdapter", function () {
 			adapter.getStateAsync.withArgs("control.manualStartTime").resolves({ val: "06:00" });
 			adapter.getStateAsync.withArgs("control.manualEndTime").resolves({ val: "18:00" });
 			adapter.getStateAsync.withArgs("control.manualWeekdays").resolves({ val: 65 });
-			adapter.getStateAsync.withArgs("control.manualPower").resolves({ val: 2000 });
+			adapter.getStateAsync.withArgs("control.manualPower").resolves({ val: -2000 });
 			adapter.getStateAsync.withArgs("control.manualEnable").resolves({ val: false });
 
-			await adapter.onStateChange("control.manualPower", { val: 1500, ack: false });
+			await adapter.onStateChange("control.manualPower", { val: -2500, ack: false });
 
 			expect(
 				adapter.sendRequest.calledWith(
@@ -1433,7 +1433,7 @@ describe("MarstekVenusAdapter", function () {
 								start_time: "06:00",
 								end_time: "18:00",
 								week_set: 65,
-								power: 2000,
+								power: -2000,
 								enable: 0,
 							}),
 						}),
