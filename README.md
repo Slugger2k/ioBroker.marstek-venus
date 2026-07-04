@@ -127,7 +127,7 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 - **`marstek-venus.0.control.manualStartTime`** - Manual mode start time (HH:MM) | string, rw
 - **`marstek-venus.0.control.manualEndTime`** - Manual mode end time (HH:MM) | string, rw
 - **`marstek-venus.0.control.manualWeekdays`** - Manual mode weekdays (1=Mon, 127=all) | number, rw
-- **`marstek-venus.0.control.manualPower`** - Manual mode power target in W | W, rw
+- **`marstek-venus.0.control.manualPower`** - Manual mode power target in W (positive=charge, negative=discharge) | W, rw
 - **`marstek-venus.0.control.manualEnable`** - Enable manual mode schedule (true/false) | bool, rw
 - **`marstek-venus.0.control.dodValue`** - Set DOD value (30-88) | %, rw
 - **`marstek-venus.0.control.bleBroadcastEnabled`** - Enable BLE broadcast (true=enabled, false=disabled) | bool, rw
@@ -166,7 +166,7 @@ Manual mode uses 10 time slots per day (0-9). Configure:
 - **`control.manualStartTime`** - Start time for the slot (HH:MM)
 - **`control.manualEndTime`** - End time for the slot (HH:MM)
 - **`control.manualWeekdays`** - Bitmask for weekdays (1=Mon, 127=all)
-- **`control.manualPower`** - Target power for the slot in W
+- **`control.manualPower`** - Target power for the slot in W (positive=charge, negative=discharge)
 - **`control.manualEnable`** - Enable this time slot
 
 ### Passive Mode Configuration
@@ -245,6 +245,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
+
 ### 0.1.19-alpha.0 (2026-05-14)
 - refactor: remove all retry logic from request/control/polling flow; all requests are now single-attempt with timeout handling only
 - feat: add `slowPollInterval` (Long-Polling / LP) as configurable field in admin UI
