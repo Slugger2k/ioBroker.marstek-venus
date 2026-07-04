@@ -250,7 +250,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.2.0 (2026-07-04)
 - fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
 - chore: remove unused `maxRetries` translation key from all language files
 
@@ -271,11 +271,6 @@ SOFTWARE.
 
 ### 0.1.17 (2026-04-24)
 - fix: correct PV1 power value scaling and update related unit tests
-
-### 0.1.16 (2026-04-24)
-- fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
-- fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
-- feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
 
 ## Support
 

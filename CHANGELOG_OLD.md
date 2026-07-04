@@ -45,6 +45,11 @@ All changelog entries prior to the current version are stored here.
 
 ### 0.1.5 (2026-04-11)
 - Initial release with full Marstek Venus Open API support
+## 0.1.16 (2026-04-24)
+- fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
+- fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout
+- feat: configurable API endpoints — each polling endpoint (ES, Battery, EM, Mode, PV, Wifi, BLE) can be enabled/disabled in the admin config UI to reduce device load
+
 ## 0.1.14 (2026-04-14)
 - Fixed: VenusE/VenusC devices failing polls with "Method not found" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)
 - refactor: replace `setStateAsync` with `setState` across codebase for consistency

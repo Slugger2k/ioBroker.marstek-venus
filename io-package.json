@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "marstek-venus",
-    "version": "0.1.19",
+    "version": "0.2.0",
     "title": "Marstek Venus",
     "titleLang": {
       "en": "Marstek Venus Energy Storage",
@@ -30,6 +30,19 @@
       "zh-cn": "Marstek Venus A/C/D/E 储能设备适配器"
     },
     "news": {
+      "0.2.0": {
+        "en": "fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)\nchore: remove unused `maxRetries` translation key from all language files",
+        "de": "Behebung: Einhaltung der Anforderungen des ioBroker-Adapters (Rollen, Titel, Autoren, ungenutzte Verzeichnisse)\nAufgabe: Entfernen Sie den nicht verwendeten Übersetzungsschlüssel `maxRetries` aus allen Sprachdateien.",
+        "ru": "Исправление: соответствие требованиям адаптера ioBroker (роли, заголовки, авторы, неиспользуемые каталоги).\nЗадача: удалить неиспользуемый ключ перевода `maxRetries` из всех языковых файлов.",
+        "pt": "Correção: atender aos requisitos do adaptador ioBroker (funções, títulos, autores, diretórios não utilizados)\nTarefa: remover a chave de tradução `maxRetries` não utilizada de todos os arquivos de idioma.",
+        "nl": "Oplossing: voldoen aan de vereisten van de ioBroker-adapter (rollen, titels, auteurs, ongebruikte mappen)\nTaak: verwijder de ongebruikte vertaalsleutel `maxRetries` uit alle taalbestanden.",
+        "fr": "Correction : se conformer aux exigences de l’adaptateur ioBroker (rôles, titres, auteurs, répertoires inutilisés)\nTâche : supprimer la clé de traduction `maxRetries` inutilisée de tous les fichiers de langue",
+        "it": "Correzione: conformità ai requisiti dell'adattatore ioBroker (ruoli, titoli, autori, directory non utilizzate)\ncompito: rimuovere la chiave di traduzione `maxRetries` non utilizzata da tutti i file di lingua",
+        "es": "Corrección: cumplir con los requisitos del adaptador ioBroker (roles, títulos, autores, directorios no utilizados).\nTarea: eliminar la clave de traducción `maxRetries` no utilizada de todos los archivos de idioma.",
+        "pl": "naprawiono: zgodność z wymaganiami adaptera ioBroker (role, tytuły, autorzy, nieużywane katalogi)\nzadanie: usuń nieużywany klucz tłumaczenia `maxRetries` ze wszystkich plików językowych",
+        "uk": "виправлення: дотримання вимог адаптера ioBroker (ролі, назви, автори, невикористовувані каталоги)\nзавдання: видалити невикористаний ключ перекладу `maxRetries` з усіх мовних файлів",
+        "zh-cn": "修复：符合 ioBroker 适配器要求（角色、标题、作者、未使用的目录）\n任务：从所有语言文件中移除未使用的 `maxRetries` 翻译键"
+      },
       "0.1.19": {
         "en": "fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)\nfeat: update implementation to match Marstek Device Open API Rev 2.0\nadd network information states (gateway, mask, dns)\nadd total energy import/export states for energy meter",
         "de": "Behoben: Negative Werte für `control.manualPower` zulassen, um die Entladeplanung im manuellen Modus zu unterstützen (schließt #42)\nFunktion: Aktualisierung der Implementierung gemäß Marstek Device Open API Rev 2.0\nNetzwerkstatusinformationen hinzufügen (Gateway, Maske, DNS)\nGesamtenergieimport-/Exportstatus für Energiezähler hinzufügen",
@@ -107,19 +120,6 @@
         "pl": "refaktor: zastąpić kruchy wzór mixin\nrefactor: zastąpić busy- czekać pętli sondażowej w sendRequest () z bezpośrednim wykorzystaniem łańcucha obietnic\nfix: PLACESECRET Porównanie symboli - teraz zdefiniowane raz na poziomie modułu zamiast per- call\nrefactor: centralizacja interwał ankiety magiczne numery",
         "uk": "рефактор: замініть фраглільний міксін візерунок\nрефактор: замініть кричущу петлю в sendRequest() з прямим обіцяючим ланцюгом повторного використання\nфіксація: ПЛАЦЕХОЛДЕР Порівняння символів - тепер визначаються один раз на рівні модуля замість задніх\nрефактор: централізоване інтерв'ю з інтервалом магічних чисел",
         "zh-cn": "重构:替换脆弱的混合图案\n重构:在发送中替换繁忙等待投票的循环,直接重复使用承诺链请求()\n定点: 定位器 符号比较 - 现在在模块级别上定义一次而不是按调用\n重构: 集中民意测验间隔魔法数字"
-      },
-      "0.1.14": {
-        "en": "Fixed: VenusE/VenusC devices failing polls with \"Method not found\" errors by skipping PV polling for models that don't support PV component (per API documentation, only Venus D/A have PV support)\nrefactor: replace `setStateAsync` with `setState` across codebase for consistency\nchore: adjust polling and timeout configuration ranges in jsonConfig\ndocs: expand README with detailed device support matrix, API component compatibility table, firmware details, and new warnings for Venus E 2.0 connectivity",
-        "de": "Behoben: VenusE/VenusC-Geräte scheitern Umfragen mit \"Method nicht gefunden\" Fehlern durch Überspringen von PV-Abfrage für Modelle, die PV-Komponente nicht unterstützen (pro API-Dokumentation haben nur Venus D/A PV-Unterstützung)\nrefactor: `setStateAsync` mit `setState` über Codebase für Konsistenz ersetzen\nchore: Anpassung der Umfrage- und Timeout-Konfigurationsbereiche in jsonConfig\ndocs: erweitern README mit detaillierter Geräteunterstützungsmatrix, API-Komponenten-Kompatibilitätstabelle, Firmware-Details und neuen Warnungen für Venus E 2.0-Konnektivität",
-        "ru": "Устройства VenusE/VenusC, не прошедшие опросы с ошибками «Метод не найден», пропуская PV-опрос для моделей, которые не поддерживают PV-компонент (в документации API только Venus D/A имеют поддержку PV)\nrefactor: заменить \"setStateAsync\" на \"setState\" по всей кодовой базе для обеспечения согласованности\nchore: настройка диапазонов опросов и тайм-аута в jsonConfig\nдокументы: расширение README с подробной матрицей поддержки устройств, таблицей совместимости компонентов API, деталями прошивки и новыми предупреждениями для подключения Venus E 2.0",
-        "pt": "Corrigido: Dispositivos VenusE/VenusC falhando pesquisas com erros de \"Método não encontrado\" pulando pesquisas de PV para modelos que não suportam componentes PV (por documentação API, apenas Venus D/A têm suporte PV)\nrefator: substituir `setStateAsync` por `setState` através da base de códigos para consistência\ntarefa: ajustar os intervalos de tempo de votação e configuração no jsonConfig\ndocs: expandir o README com matriz de suporte detalhado de dispositivos, tabela de compatibilidade de componentes API, detalhes de firmware e novos avisos para conectividade Venus E 2.0",
-        "nl": "Fixed: VenusE/VenusC apparaten falen polls met \"Method not found\" fouten door het overslaan van PV polling voor modellen die niet ondersteunen PV-component (per API documentatie, alleen Venus D/A hebben PV ondersteuning)\nrefactor: vervang \nchore: het aanpassen van polling en timeout configuratiebereiken in jsonConfig\ndocs: breid README uit met gedetailleerde ondersteuningsmatrix, API-compatibiliteitstabel, firmware details en nieuwe waarschuwingen voor Venus E 2.0-connectiviteit",
-        "fr": "Correction : les périphériques VenusE/VenusC échouent les sondages avec des erreurs \"Méthod not found\" en sautant les sondages PV pour les modèles qui ne prennent pas en charge les composants PV (par la documentation de l'API, seuls Venus D/A ont le support PV)\nrefactor: remplacer `setStateAsync` par `setState` à travers la base de code pour assurer la cohérence\ncore: ajuster les plages de configuration du vote et du timeout dans jsonConfig\ndocs: élargissez README avec la matrice de support détaillée des périphériques, table de compatibilité des composants API, détails du firmware et nouveaux avertissements pour la connectivité Vénus E 2.0",
-        "it": "Risolto: dispositivi VenusE/VenusC che non riescono a sondare con errori \"Method not found\" saltando l'inquinante PV per modelli che non supportano componenti PV (per documentazione API, solo Venus D/A ha il supporto fotovoltaico)\nrefactor: sostituire `setStateAsync` con `setState` attraverso codebase per coerenza\ncore: regolare le configurazioni di polling e timeout in jsonConfig\ndocs: espandere README con matrice di supporto del dispositivo dettagliata, tabella di compatibilità dei componenti API, dettagli del firmware e nuovi avvisi per la connettività Venus E 2.0",
-        "es": "Fijo: Los dispositivos VenusE/VenusC fallan encuestas con errores \"Method not found\" saltando encuestas PV para modelos que no soportan componente PV (por documentación de API, sólo Venus D/A tienen soporte PV)\nrefactor: sustitúyase `setStateAsync` por `setState` en base a código para la coherencia\ncoro: ajustar rangos de configuración de encuestas y timeout en jsonConfig\ndocs: expandir README con matriz de soporte de dispositivo detallada, tabla de compatibilidad de componentes API, detalles de firmware y nuevas advertencias para la conectividad Venus E 2.0",
-        "pl": "Naprawiono: Urządzenia VenusE / VenusC nie powiodły się sondaże z błędami \"Metoda nie znaleziona\" pomijając sondaże fotowoltaiczne dla modeli, które nie obsługują komponentu fotowoltaicznego (w dokumentacji API tylko Venus D / A posiada wsparcie fotowoltaiczne)\nrefactor: zastąpić 'setStateAsync' przez 'setState' przez kodebase dla spójności\nchore: dostosować zakresy konfiguracji sondowania i timeout w jsonConfig\ndocs: rozszerzenie README ze szczegółową matrycą wspierającą urządzenie, tablicą kompatybilności komponentów API, szczegółami oprogramowania firmowego oraz nowymi ostrzeżeniami dla połączeń Venus E 2.0",
-        "uk": "Виправлено: Пристрої VerE/VenusC не знайшли помилок \"Method не знайдено\" для моделей, які не підтримують PV-компонент (за документацією API, тільки підтримка венер D / A)\nрефактор: заміна `setStateAsync` з базою коду `setState для консистенції\nchore: регулюйте діапазони конфігурації пилу та часу у jsonConfig\ndocs: розширення README з докладним програмним забезпеченням, таблиця сумісності API, деталі прошивки та нові попередження для підключення Intel E 2.0",
-        "zh-cn": "固定:金星E/VenusC设备通过跳过不支持光伏组件的模型的光伏投票,以\"没有找到的方法\"错误的投票失败(根据API文件,只有金星D/A有光伏支持)\n重构:将“set State Async”改为“set State”,用于整个代码库的一致性\n弦:调整jsonConfig的投票和超时配置范围\ndocs:通过详细的设备支持矩阵,API组件兼容表,固件细节,以及金星 E 2.0 连接的新警告来扩展 README"
       }
     },
     "icon": "marstek-venus.png",
@@ -183,7 +183,7 @@
     "enableWifiStatus": true,
     "enableBLEStatus": true
   },
-    "instanceObjects": [
+  "instanceObjects": [
     {
       "_id": "info",
       "type": "channel",
