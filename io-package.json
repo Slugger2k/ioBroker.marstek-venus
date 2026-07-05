@@ -138,7 +138,6 @@
     "mode": "daemon",
     "compact": true,
     "tier": 3,
-    "noConfig": false,
     "noIntro": false,
     "connectionType": "local",
     "dataSource": "poll",
