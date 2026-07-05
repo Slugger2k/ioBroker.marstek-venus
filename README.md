@@ -261,6 +261,8 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 
 See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## Support
 
 For support, visit the ioBroker forum or GitHub repository. When reporting issues, please include:
