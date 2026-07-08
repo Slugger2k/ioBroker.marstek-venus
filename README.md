@@ -227,6 +227,7 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 
 ## Changelog
 ### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires admin >= 7.8.23 now.
 
 ### 0.2.0 (2026-07-04)
 - fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
@@ -260,6 +261,8 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - fix: correct PV1 power value scaling and update related unit tests
 
 See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
 
 ## Support
 
