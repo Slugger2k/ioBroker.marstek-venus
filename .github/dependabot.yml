@@ -16,15 +16,16 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: '@types/node'
+        update-types:
+          - 'version-update:semver-major'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: cron
+      interval: 'cron'
       cronjob: '0 4 10 * *'
-      timezone: Europe/Berlin
+      timezone: 'Europe/Berlin'
     open-pull-requests-limit: 15
     cooldown:
       default-days: 7
