@@ -45,6 +45,11 @@ All changelog entries prior to the current version are stored here.
 
 ### 0.1.5 (2026-04-11)
 - Initial release with full Marstek Venus Open API support
+## 0.1.17 (2026-04-24)
+- fix: correct PV1 power value scaling and update related unit tests
+
+See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
+
 ## 0.1.16 (2026-04-24)
 - fix: remove duplicate ES.GetStatus requests — fast poll and normal poll no longer both call the same API method
 - fix: remove internal retry loop from sendRequest that bypassed rate-limit queue, causing unthrottled request bursts on timeout

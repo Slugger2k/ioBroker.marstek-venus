@@ -226,7 +226,7 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.2.1 (2026-07-18)
 - Updated integration tests to use a UDP mock server, enabling reliable execution in CI environments (GitHub/GitLab Actions) without physical hardware.
 - Added integration tests
 - Fixed ERESOLVE dependency conflict with @iobroker/eslint-config and @typescript-eslint/parser
@@ -260,11 +260,6 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 ### 0.1.18 (2026-04-25)
 - fix: use `ongrid_power`/`offgrid_power` from `ES.GetMode` response to update `power.grid`/`power.load` (closes #26)
 - chore: remove unused `power.pvVoltage` and `power.pvCurrent` states from adapter and documentation
-
-### 0.1.17 (2026-04-24)
-- fix: correct PV1 power value scaling and update related unit tests
-
-See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
