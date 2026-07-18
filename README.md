@@ -225,7 +225,10 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - Ensure manual mode settings are valid
 
 
+## Changelog
 ### **WORK IN PROGRESS**
+- Fixed ERESOLVE dependency conflict with @iobroker/eslint-config and @typescript-eslint/parser
+- Updated @types/node to 22.20.1 to fix npm ci sync issue
 
 ### 0.2.0 (2026-07-04)
 - fix: comply with ioBroker adapter requirements (roles, titles, authors, unused directories)
@@ -233,7 +236,12 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - chore: update dependencies and Node.js version requirements
 - fix: use adapter.setTimeout instead of plain setTimeout
 - fix: move license to the end of README.md and add link to CHANGELOG_OLD.md
-- chore: enable trusted publishing by removing npm-token from GitHub Actions
+- fix: corrected invalid `@alcalzone/release-script-plugin-*` versions in `package.json`
+- fix: update `@iobroker/testing` to 5.2.2 as required
+- fix: remove deprecated `common.title` and unknown `common.author` from `io-package.json`
+- fix: add missing translations for `192.168.1.xxx`
+- fix: ensure `test:integration` script does not swallow errors and handle missing integration tests gracefully
+- chore: enable trusted publishing by configuring NPM_TOKEN and provenance in GitHub Actions
 
 ### 0.1.19 (2026-07-04)
 - fix: allow negative values for `control.manualPower` to support discharge planning in manual mode (closes #42)
@@ -254,6 +262,8 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - fix: correct PV1 power value scaling and update related unit tests
 
 See [CHANGELOG_OLD.md](CHANGELOG_OLD.md) for older changes.
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
 
 ## Support
 
