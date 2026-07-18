@@ -49,7 +49,7 @@
     "release": "release-script",
     "test:package": "mocha test/package.test.js --exit",
     "test:unit": "mocha \"test/*.test.js\" --exit",
-    "test:integration": "echo \"No integration tests defined\"",
+    "test:integration": "mocha test/integration.js --exit",
     "coverage": "nyc npm run test",
     "coverage:report": "nyc report --reporter=text --reporter=lcov --reporter=html",
     "lint": "eslint .",

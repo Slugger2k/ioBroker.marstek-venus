@@ -227,6 +227,10 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 
 ## Changelog
 ### **WORK IN PROGRESS**
+- Updated integration tests to use a UDP mock server, enabling reliable execution in CI environments (GitHub/GitLab Actions) without physical hardware.
+- Added integration tests
+- Fixed ERESOLVE dependency conflict with @iobroker/eslint-config and @typescript-eslint/parser
+- Updated @types/node to 22.20.1 to fix npm ci sync issue
 - (ioBroker-Bot) Adapter requires admin >= 7.8.23 now.
 
 ### 0.2.0 (2026-07-04)
