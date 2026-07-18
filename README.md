@@ -1,6 +1,8 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Slugger2k/ioBroker.marstek-venus/blob/main/LICENSE)
 [![npm version](https://img.shields.io/npm/v/iobroker.marstek-venus.svg)](https://www.npmjs.com/package/iobroker.marstek-venus)
 [![Downloads](https://img.shields.io/npm/dt/iobroker.marstek-venus.svg)](https://www.npmjs.com/package/iobroker.marstek-venus)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.marstek-venus.svg)](https://www.npmjs.com/package/iobroker.marstek-venus)
+![Number of Installations](https://iobroker.live/badges/marstek-venus-installed.svg)
 [![Build Status](https://github.com/Slugger2k/ioBroker.marstek-venus/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/Slugger2k/ioBroker.marstek-venus/actions)
 
 # ioBroker.marstek-venus Adapter
@@ -92,10 +94,18 @@ The firmware archive only covers Venus E 3.0. No community-archived firmware exi
 |-----------|-------------|---------|
 | **ipAddress** | Leave empty for auto-discovery, or enter device IP | (empty) |
 | **udpPort** | UDP port for communication | 30000 |
-| **pollInterval** | Normal poll interval for all status values (ms) | 30000 |
-| **fastPollInterval** | Fast poll interval for power values (ms) | 10000 |
-| **requestTimeout** | Request timeout for each request (ms) | 5000 |
+| **pollInterval** | Normal poll interval for all status values (ms) | 70000 |
+| **fastPollInterval** | Fast poll interval for power values (ms) | 35000 |
+| **slowPollInterval** | Slow poll interval for WiFi/BLE status (ms) | 600000 |
+| **requestTimeout** | Request timeout for each request (ms) | 7000 |
 | **autoDiscovery** | Enable automatic device discovery | true |
+| **enableESStatus** | Enable Energy Storage status polling | true |
+| **enableBatteryStatus** | Enable Battery status polling | true |
+| **enableEMStatus** | Enable Energy Meter status polling | true |
+| **enableModeStatus** | Enable Mode status polling | true |
+| **enablePVStatus** | Enable PV status polling (auto-skipped if not supported) | true |
+| **enableWifiStatus** | Enable WiFi status polling | true |
+| **enableBLEStatus** | Enable BLE status polling | true |
 
 ## States Documentation
 
@@ -214,10 +224,10 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 - Check WiFi signal strength (network.rssi)
 
 ### Polling Issues
-- Adjust `fastPollInterval` for power value update frequency (default 5000ms)
-- Adjust `pollInterval` for normal status update frequency (default 20000ms)
-- Adjust `requestTimeout` for slow or unstable networks
-- Slow poll runs every 10 minutes for network status
+- Adjust `fastPollInterval` for power value update frequency (default 35000ms)
+- Adjust `pollInterval` for normal status update frequency (default 70000ms)
+- Adjust `requestTimeout` for slow or unstable networks (default 7000ms)
+- Slow poll runs according to `slowPollInterval` (default 10 minutes) for WiFi and BLE status
 
 ### State Updates Not Working
 - Verify control states are writable (some are read-only)
@@ -226,6 +236,8 @@ Additional adapter extension (not listed in provided Rev 2.0 spec):
 
 
 ## Changelog
+### **WORK IN PROGRESS**
+
 ### 0.2.1 (2026-07-18)
 - Updated integration tests to use a UDP mock server, enabling reliable execution in CI environments (GitHub/GitLab Actions) without physical hardware.
 - Added integration tests
