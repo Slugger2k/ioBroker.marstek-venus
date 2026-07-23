@@ -5,6 +5,8 @@
 ![Number of Installations](https://iobroker.live/badges/marstek-venus-installed.svg)
 [![Build Status](https://github.com/Slugger2k/ioBroker.marstek-venus/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/Slugger2k/ioBroker.marstek-venus/actions)
 
+![Development Stopped](dev_stopped.png)
+
 # ioBroker.marstek-venus Adapter
 
 The ioBroker.marstek-venus adapter provides full integration with [Marstek](https://www.marstekenergy.com/) Venus series energy storage systems, implementing the official Open API for complete device control and monitoring.
